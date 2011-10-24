@@ -1,0 +1,12 @@
+<?xml version='1.0'?>
+<document>
+<artist>Simple Artist</artist>
+<title>A Simple Song</title>
+<capo>0</capo>
+<key>E</key>
+<favourite>true</favourite>
+<lyrics>Simple
+Simple
+Simple
+Simple Song</lyrics>
+</document>
