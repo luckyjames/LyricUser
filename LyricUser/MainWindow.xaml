@@ -1,8 +1,9 @@
 ﻿<Window x:Class="LyricUser.MainWindow"
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:lyricUserNamespace="clr-namespace:LyricUser"
         Title="LyricUser" Height="397" Width="573" ResizeMode="CanResizeWithGrip" KeyUp="Window_KeyUp">
     <Viewbox HorizontalAlignment="Center" Margin="0,0,0,0" Name="textViewBox" VerticalAlignment="Center" Stretch="Uniform">
-        <TextBlock Name="lyricsTextBlock" Text="Some Lyrics" HorizontalAlignment="Stretch" VerticalAlignment="Stretch" TextAlignment="Center" Padding="0" />
+        <lyricUserNamespace:AutoScalingTextBox />
     </Viewbox>
 </Window>
