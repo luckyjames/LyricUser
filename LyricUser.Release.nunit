@@ -1,0 +1,6 @@
+﻿<NUnitProject>
+  <Settings activeconfig="Default" />
+  <Config name="Default" binpathtype="Auto">
+    <assembly path="LyricUser.Test\bin\Release\LyricUser.Test.dll" />
+  </Config>
+</NUnitProject>

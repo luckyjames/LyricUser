@@ -2,3 +2,5 @@
 *.suo
 /LyricUser/obj
 /LyricUser/bin
+/LyricUser.Test/obj
+/LyricUser.Test/bin
