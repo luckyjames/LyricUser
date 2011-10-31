@@ -3,7 +3,5 @@
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:lyricUserNamespace="clr-namespace:LyricUser"
         Title="LyricUser" Height="397" Width="573" ResizeMode="CanResizeWithGrip" KeyUp="Window_KeyUp">
-    <Viewbox HorizontalAlignment="Center" Margin="0,0,0,0" Name="textViewBox" VerticalAlignment="Center" Stretch="Uniform">
-        <lyricUserNamespace:AutoScalingTextBox />
-    </Viewbox>
+    <lyricUserNamespace:AutoScalingTextBox x:Name="lyricsBox" InfoText="Default" />
 </Window>
