@@ -1,6 +1,9 @@
 ﻿<NUnitProject>
-  <Settings activeconfig="Default" />
-  <Config name="Default" binpathtype="Auto">
+  <Settings activeconfig="Release" />
+  <Config name="Debug" binpathtype="Auto">
+    <assembly path="LyricUser.Test\bin\Debug\LyricUser.Test.dll" />
+  </Config>
+  <Config name="Release" binpathtype="Auto">
     <assembly path="LyricUser.Test\bin\Release\LyricUser.Test.dll" />
   </Config>
 </NUnitProject>
