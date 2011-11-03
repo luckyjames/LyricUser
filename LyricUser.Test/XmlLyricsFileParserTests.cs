@@ -1,12 +1,21 @@
 ﻿
 using NUnit.Framework;
 using System;
+using System.Xml;
 
 namespace LyricUser.Test
 {
+    /// <summary>
+    /// A test fisture for XmlLyricsFileParser
+    /// </summary>
+    /// <remarks>
+    /// Note that these are not unit tests; they are system tests
+    /// </remarks>
     [TestFixture]
-    public class SettingsTests
+    public class XmlLyricsFileParserTests
     {
+        const string relativePathToTestData = @"..\..\..\TestData\SimpleSong.xml";
+
         [TestCase]
         public void NullFails()
         {
@@ -16,9 +25,14 @@ namespace LyricUser.Test
         [TestCase]
         public void SimpleTest()
         {
-            const string relativePathToTestData = @"..\..\..\TestData\SimpleSong.xml";
             XmlLyricsFileParser xmlLyricsFileParser = new XmlLyricsFileParser(relativePathToTestData);
-            Assert.IsNotNullOrEmpty(xmlLyricsFileParser.Lyrics);
+            Assert.IsNotNull(xmlLyricsFileParser.DataPairs);
+            Assert.AreEqual(6, xmlLyricsFileParser.DataPairs.Count);
+
+            Assert.AreEqual("A Simple Song", xmlLyricsFileParser.DataPairs["title"]);
+            Assert.AreEqual("Simple Artist", xmlLyricsFileParser.DataPairs["artist"]);
+            Assert.AreEqual("0", xmlLyricsFileParser.DataPairs["capo"]);
+            // etc..
         }
     }
 }
