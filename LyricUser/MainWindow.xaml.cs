@@ -1,6 +1,9 @@
 ﻿using System;
 using System.Windows;
 using System.Windows.Input;
+using System.Collections.Generic;
+using System.Windows.Controls;
+using System.Windows.Documents;
 
 namespace LyricUser
 {
@@ -56,7 +59,19 @@ namespace LyricUser
         {
             this.lyricsBox.Text = lyricsPresenter.Lyrics;
 
-            System.Diagnostics.Debug.WriteLine("POpulating form with metadata not implemented yet.");
+            // For each additional piece of data, push a new TextBlock into the StackPanel
+            foreach (KeyValuePair<string, string> entry in lyricsPresenter.Metadata)
+            {
+                TextBlock newKeyTextBlock = new TextBlock();
+                newKeyTextBlock.Text = entry.Key;
+                newKeyTextBlock.Foreground = System.Windows.Media.Brushes.Black;
+                this.metadataStackPanel.Children.Add(newKeyTextBlock);
+
+                TextBlock newValueTextBlock = new TextBlock();
+                newValueTextBlock.Text = entry.Value;
+                newValueTextBlock.Foreground = System.Windows.Media.Brushes.White;
+                this.metadataStackPanel.Children.Add(newValueTextBlock);
+            }
         }
 
         private IPerformableLyrics lyricsPresenter;
