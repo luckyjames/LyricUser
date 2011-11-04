@@ -14,7 +14,7 @@
         Width="800">
     <!--Use dock panel so that last child (the lyrics box) fills the available space-->
     <DockPanel>
-        <Border BorderBrush="#FF000000" BorderThickness="1,1,1,1" CornerRadius="8,8,8,8" Background="Blue">
+        <Border BorderBrush="#FF000000" BorderThickness="1,1,1,1" CornerRadius="0,10,10,0" Background="#6666FF" HorizontalAlignment="Center">
             <StackPanel Name="metadataStackPanel" />
         </Border>
         <lyricUserNamespace:AutoScalingTextBox x:Name="lyricsBox" Text="Default" />

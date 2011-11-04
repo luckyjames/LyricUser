@@ -35,12 +35,14 @@ namespace LyricUser
             {
                 case WindowState.Maximized:
                     this.WindowState = System.Windows.WindowState.Normal;
+                    this.WindowStyle = System.Windows.WindowStyle.ThreeDBorderWindow;
                     break;
                 case WindowState.Minimized:
                     System.Diagnostics.Debug.Print("Window is minimised, leave state unchanged.");
                     break;
                 case WindowState.Normal:
                     this.WindowState = System.Windows.WindowState.Maximized;
+                    this.WindowStyle = System.Windows.WindowStyle.None;
                     break;
                 default:
                     throw new ApplicationException("Unrecognised window state: " + this.WindowState);
@@ -64,11 +66,13 @@ namespace LyricUser
             {
                 TextBlock newKeyTextBlock = new TextBlock();
                 newKeyTextBlock.Text = entry.Key;
+                newKeyTextBlock.FontSize = 14;
                 newKeyTextBlock.Foreground = System.Windows.Media.Brushes.Black;
                 this.metadataStackPanel.Children.Add(newKeyTextBlock);
 
                 TextBlock newValueTextBlock = new TextBlock();
                 newValueTextBlock.Text = entry.Value;
+                newValueTextBlock.FontSize = 14;
                 newValueTextBlock.Foreground = System.Windows.Media.Brushes.White;
                 this.metadataStackPanel.Children.Add(newValueTextBlock);
             }
