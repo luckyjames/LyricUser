@@ -1,4 +1,5 @@
 ﻿using System.Windows;
+using System;
 
 namespace LyricUser
 {
@@ -7,7 +8,14 @@ namespace LyricUser
     /// </summary>
     public partial class App : Application
     {
-        private XmlLyricsFileParser xmlLyricsFileParser;
+        private string lyricsUrl;
+        public string LyricsUrl
+        {
+            get
+            {
+                return lyricsUrl;
+            }
+        }
 
         protected override void OnStartup(StartupEventArgs e)
         {
@@ -19,7 +27,7 @@ namespace LyricUser
             }
             else
             {
-                xmlLyricsFileParser = new XmlLyricsFileParser(e.Args[0]);
+                lyricsUrl = e.Args[0];
             }
         }
     }

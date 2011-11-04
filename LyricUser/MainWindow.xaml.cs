@@ -12,6 +12,18 @@ namespace LyricUser
         public MainWindow()
         {
             InitializeComponent();
+
+            // This code looks wrong refactoring required..
+            App thisApp = Application.Current as App;
+
+            if (null == thisApp)
+            {
+                throw new ApplicationException("MainWinow property has incorrect type!");
+            }
+            else
+            {
+                this.LyricsPresenter = new LyricsPresenter(new XmlLyricsFileParser(thisApp.LyricsUrl));
+            }
         }
 
         private void ToggleMaxmised()
@@ -37,6 +49,28 @@ namespace LyricUser
             if (Key.F11 == e.Key)
             {
                 ToggleMaxmised();
+            }
+        }
+
+        private void PopulateWindow()
+        {
+            this.lyricsBox.Text = lyricsPresenter.Lyrics;
+
+            System.Diagnostics.Debug.WriteLine("POpulating form with metadata not implemented yet.");
+        }
+
+        private IPerformableLyrics lyricsPresenter;
+        internal IPerformableLyrics LyricsPresenter
+        {
+            get
+            {
+                return lyricsPresenter;
+            }
+            set
+            {
+                lyricsPresenter = value;
+
+                PopulateWindow();
             }
         }
     }

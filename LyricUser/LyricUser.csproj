@@ -55,6 +55,8 @@
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </ApplicationDefinition>
+    <Compile Include="IPerformableLyrics.cs" />
+    <Compile Include="LyricsPresenter.cs" />
     <Compile Include="XmlLyricsFileParser.cs" />
     <Page Include="AutoScalingTextBox.xaml">
       <SubType>Designer</SubType>

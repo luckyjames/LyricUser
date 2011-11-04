@@ -13,7 +13,7 @@ namespace LyricUser
             InitializeComponent();
         }
 
-        public string InfoText
+        public string Text
         {
             get
             {
