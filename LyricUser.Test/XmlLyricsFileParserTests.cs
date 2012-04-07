@@ -14,7 +14,7 @@ namespace LyricUser.Test
     [TestFixture]
     public class XmlLyricsFileParserTests
     {
-        const string relativePathToTestData = @"..\..\..\TestData\SimpleSong.xml";
+        const string relativePathToTestData = @"..\..\TestData\SimpleSong.xml";
 
         [TestCase]
         public void NullFails()

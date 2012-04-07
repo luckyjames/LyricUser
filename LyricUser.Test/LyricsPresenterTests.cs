@@ -7,7 +7,7 @@ namespace LyricUser.Test
     [TestFixture]
     class LyricsPresenterTests
     {
-        const string relativePathToTestData = @"..\..\..\TestData\SimpleSong.xml";
+        const string relativePathToTestData = @"..\..\TestData\SimpleSong.xml";
 
         [TestCase]
         public void NullConstruction()
