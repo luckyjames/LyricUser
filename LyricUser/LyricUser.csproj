@@ -55,6 +55,9 @@
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </ApplicationDefinition>
+    <Compile Include="BrowseView.xaml.cs">
+      <DependentUpon>BrowseView.xaml</DependentUpon>
+    </Compile>
     <Compile Include="IPerformableLyrics.cs" />
     <Compile Include="LyricsPresenter.cs" />
     <Compile Include="XmlLyricsFileParser.cs" />
@@ -62,7 +65,11 @@
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
-    <Page Include="MainWindow.xaml">
+    <Page Include="BrowseView.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="PerformanceView.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </Page>
@@ -73,8 +80,8 @@
     <Compile Include="AutoScalingTextBox.xaml.cs">
       <DependentUpon>AutoScalingTextBox.xaml</DependentUpon>
     </Compile>
-    <Compile Include="MainWindow.xaml.cs">
-      <DependentUpon>MainWindow.xaml</DependentUpon>
+    <Compile Include="PerformanceView.xaml.cs">
+      <DependentUpon>PerformanceView.xaml</DependentUpon>
       <SubType>Code</SubType>
     </Compile>
   </ItemGroup>

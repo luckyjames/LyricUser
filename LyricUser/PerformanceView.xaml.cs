@@ -8,11 +8,11 @@ using System.Windows.Documents;
 namespace LyricUser
 {
     /// <summary>
-    /// Interaction logic for MainWindow.xaml
+    /// Interaction logic for PerformanceView.xaml
     /// </summary>
-    public partial class MainWindow : Window
+    public partial class PerformanceView : Window
     {
-        public MainWindow()
+        public PerformanceView()
         {
             InitializeComponent();
 

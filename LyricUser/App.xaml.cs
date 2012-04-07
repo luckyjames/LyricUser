@@ -15,6 +15,10 @@ namespace LyricUser
             {
                 return lyricsUrl;
             }
+            set
+            {
+                lyricsUrl = value;
+            }
         }
 
         protected override void OnStartup(StartupEventArgs e)
