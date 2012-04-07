@@ -1,4 +1,6 @@
-﻿using System.Collections.Generic;
+﻿
+using System;
+using System.Collections.Generic;
 using System.Xml;
 
 namespace LyricUser
@@ -42,6 +44,27 @@ namespace LyricUser
             while (!xmlTextReader.EOF && XmlNodeType.Element != xmlTextReader.NodeType);
 
             return (XmlNodeType.Element == xmlTextReader.NodeType);
+        }
+
+        public static ValueType ReadValue<ValueType>(string xmlFileUrl, string key)
+        {
+            using (XmlTextReader xmlTextReader = new XmlTextReader(xmlFileUrl))
+            {
+                // Read to the document element start node
+                xmlTextReader.ReadToFollowing("document");
+
+                // Look for elements that represent key-value pair data:
+                //  element name is data name, content is value
+                while (ReadToNextElement(xmlTextReader))
+                {
+                    if (string.Equals(key, xmlTextReader.Name))
+                    {
+                        return (ValueType)Convert.ChangeType(xmlTextReader.ReadElementContentAsString(), typeof(ValueType));
+                    }
+                }
+
+                throw new ApplicationException("Couldn't find key - " + key);
+            }
         }
 
         /// <summary>

@@ -34,5 +34,12 @@ namespace LyricUser.Test
             Assert.AreEqual("0", xmlLyricsFileParser.DataPairs["capo"]);
             // etc..
         }
+
+        [TestCase]
+        public void GetFavourite()
+        {
+            bool favouriteValue = XmlLyricsFileParser.ReadValue<bool>(relativePathToTestData, "favourite");
+            Assert.AreEqual(true, favouriteValue);
+        }
     }
 }
