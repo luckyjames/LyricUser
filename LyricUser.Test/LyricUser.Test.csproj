@@ -21,6 +21,7 @@
     <DefineConstants>DEBUG;TRACE</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
+    <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
     <DebugType>pdbonly</DebugType>
@@ -29,12 +30,13 @@
     <DefineConstants>TRACE</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
+    <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
   </PropertyGroup>
   <PropertyGroup>
-	<StartAction>Program</StartAction>
-	<StartProgram>$(MSBuildProjectDirectory)\..\3rdParty\NUnit\bin\net-2.0\nunit-console.exe</StartProgram>
-	<StartArguments>"$(MSBuildProjectDirectory)\$(OutputPath)\$(AssemblyName).dll"</StartArguments>
-	<StartWorkingDirectory></StartWorkingDirectory>
+    <StartAction>Program</StartAction>
+    <StartProgram>$(MSBuildProjectDirectory)\..\3rdParty\NUnit\bin\net-2.0\nunit-console.exe</StartProgram>
+    <StartArguments>"$(MSBuildProjectDirectory)\$(OutputPath)\$(AssemblyName).dll"</StartArguments>
+    <StartWorkingDirectory />
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="nunit.framework">
