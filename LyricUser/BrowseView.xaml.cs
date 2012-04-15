@@ -25,7 +25,7 @@ namespace LyricUser
         }
 
         private string rootPath;
-        public string RootPath 
+        public string RootPath
         {
             get
             {
@@ -73,7 +73,8 @@ namespace LyricUser
             }
             else
             {
-                throw new ApplicationException("itemPath does not exist");
+                throw new ApplicationException(
+                    "itemPath does not exist - " + itemPath + ". CD = " + Directory.GetCurrentDirectory());
             }
             return subitem;
         }
@@ -99,7 +100,29 @@ namespace LyricUser
 
         private void fileTree_Initialized(object sender, EventArgs e)
         {
-            RootPath = @"C:\Documents and Settings\XPMUser\Desktop\GIT\LyricUser\LyricUser.Test\TestData";
+            // Debug run directory
+            RootPath = @"..\..\..\LyricUser.Test\TestData";
+        }
+
+        private void browseButton_Click(object sender, RoutedEventArgs e)
+        {
+            var dialog = new System.Windows.Forms.FolderBrowserDialog();
+            System.Windows.Forms.DialogResult result = dialog.ShowDialog();
+            switch (result)
+            {
+                case System.Windows.Forms.DialogResult.OK:
+                    RootPath = dialog.SelectedPath;
+                    break;
+                case System.Windows.Forms.DialogResult.Yes:
+                case System.Windows.Forms.DialogResult.Abort:
+                case System.Windows.Forms.DialogResult.Cancel:
+                case System.Windows.Forms.DialogResult.Ignore:
+                case System.Windows.Forms.DialogResult.No:
+                case System.Windows.Forms.DialogResult.None:
+                case System.Windows.Forms.DialogResult.Retry:
+                default:
+                    throw new NotImplementedException(result.ToString());
+            }
         }
     }
 }

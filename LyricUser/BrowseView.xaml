@@ -3,6 +3,9 @@
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         Title="Lyrics Browser" Height="300" Width="300" WindowStartupLocation="CenterScreen" WindowState="Maximized">
     <DockPanel>
+        <StackPanel HorizontalAlignment="Left" Name="bottonsPanel" VerticalAlignment="Top">
+            <Button Name="browseButton" Content="..." Click="browseButton_Click" />
+        </StackPanel>
         <TreeView HorizontalAlignment="Left" Name="fileTree" VerticalAlignment="Top" Initialized="fileTree_Initialized" />
     </DockPanel>
 </Window>
