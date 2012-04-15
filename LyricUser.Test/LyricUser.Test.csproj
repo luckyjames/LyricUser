@@ -30,6 +30,12 @@
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
+  <PropertyGroup>
+	<StartAction>Program</StartAction>
+	<StartProgram>$(MSBuildProjectDirectory)\..\3rdParty\NUnit\bin\net-2.0\nunit-console.exe</StartProgram>
+	<StartArguments>"$(MSBuildProjectDirectory)\$(OutputPath)\$(AssemblyName).dll"</StartArguments>
+	<StartWorkingDirectory></StartWorkingDirectory>
+  </PropertyGroup>
   <ItemGroup>
     <Reference Include="nunit.framework">
       <HintPath>..\3rdParty\NUnit\bin\net-2.0\nunit.framework.dll</HintPath>

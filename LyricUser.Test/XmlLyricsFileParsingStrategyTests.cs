@@ -2,6 +2,7 @@
 using NUnit.Framework;
 using System;
 using System.Xml;
+using System.Collections.Generic;
 
 namespace LyricUser.Test
 {
@@ -26,19 +27,21 @@ namespace LyricUser.Test
         public void SimpleTest()
         {
             XmlLyricsFileParsingStrategy xmlLyricsFileParser = new XmlLyricsFileParsingStrategy(relativePathToTestData);
-            Assert.IsNotNull(xmlLyricsFileParser.DataPairs);
-            Assert.AreEqual(6, xmlLyricsFileParser.DataPairs.Count);
+            IDictionary<string, string> results = xmlLyricsFileParser.ReadAll();
+            Assert.IsNotNull(results);
+            Assert.AreEqual(6, results.Count);
 
-            Assert.AreEqual("A Simple Song", xmlLyricsFileParser.DataPairs["title"]);
-            Assert.AreEqual("Simple Artist", xmlLyricsFileParser.DataPairs["artist"]);
-            Assert.AreEqual("0", xmlLyricsFileParser.DataPairs["capo"]);
+            Assert.AreEqual("A Simple Song", results["title"]);
+            Assert.AreEqual("Simple Artist", results["artist"]);
+            Assert.AreEqual("0", results["capo"]);
             // etc..
         }
 
         [TestCase]
         public void GetFavourite()
         {
-            bool favouriteValue = XmlLyricsFileParsingStrategy.ReadValue<bool>(relativePathToTestData, "favourite");
+            XmlLyricsFileParsingStrategy xmlLyricsFileParsingStrategy = new XmlLyricsFileParsingStrategy(relativePathToTestData);
+            bool favouriteValue = xmlLyricsFileParsingStrategy.ReadValue<bool>("favourite");
             Assert.AreEqual(true, favouriteValue);
         }
     }

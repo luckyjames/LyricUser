@@ -4,6 +4,9 @@ using System;
 
 namespace LyricUser
 {
+    /// <summary>
+    /// A readonly presenter class for performance
+    /// </summary>
     public class LyricsPresenter : IPerformableLyrics
     {
         public LyricsPresenter(XmlLyricsFileParsingStrategy xmlLyricsFileParser)
@@ -14,12 +17,14 @@ namespace LyricUser
             }
             else
             {
+                IDictionary<string, string> dataPairs = xmlLyricsFileParser.ReadAll();
+
                 // Find lyrics
-                lyrics = xmlLyricsFileParser.DataPairs["lyrics"];
+                lyrics = dataPairs["lyrics"];
 
                 // Now find everything but the lyrics
                 Collection<KeyValuePair<string, string>> incomingMetadata = new Collection<KeyValuePair<string, string>>();
-                foreach (KeyValuePair<string, string> value in xmlLyricsFileParser.DataPairs)
+                foreach (KeyValuePair<string, string> value in dataPairs)
                 {
                     if ("lyrics" != value.Key)
                     {
