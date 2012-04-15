@@ -25,7 +25,7 @@ namespace LyricUser
             }
             else
             {
-                this.LyricsPresenter = new LyricsPresenter(new XmlLyricsFileParser(thisApp.LyricsUrl));
+                this.LyricsPresenter = new LyricsPresenter(new XmlLyricsFileParsingStrategy(thisApp.LyricsUrl));
             }
         }
 

@@ -19,7 +19,7 @@ namespace LyricUser.Test
         public void ValidDataPresentsLyrics()
         {
             // No Mocking library yet so..
-            XmlLyricsFileParser xmlLyricsFileParser = new XmlLyricsFileParser(relativePathToTestData);
+            XmlLyricsFileParsingStrategy xmlLyricsFileParser = new XmlLyricsFileParsingStrategy(relativePathToTestData);
 
             LyricsPresenter lyricsPresenter = new LyricsPresenter(xmlLyricsFileParser);
 
@@ -30,7 +30,7 @@ namespace LyricUser.Test
         public void ValidDataPresentsMetadata()
         {
             // No Mocking library yet so..
-            XmlLyricsFileParser xmlLyricsFileParser = new XmlLyricsFileParser(relativePathToTestData);
+            XmlLyricsFileParsingStrategy xmlLyricsFileParser = new XmlLyricsFileParsingStrategy(relativePathToTestData);
 
             LyricsPresenter lyricsPresenter = new LyricsPresenter(xmlLyricsFileParser);
 

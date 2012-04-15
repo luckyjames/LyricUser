@@ -6,26 +6,26 @@ using System.Xml;
 namespace LyricUser.Test
 {
     /// <summary>
-    /// A test fisture for XmlLyricsFileParser
+    /// A test fisture for XmlLyricsFileParsingStrategy
     /// </summary>
     /// <remarks>
     /// Note that these are not unit tests; they are system tests
     /// </remarks>
     [TestFixture]
-    public class XmlLyricsFileParserTests
+    public class XmlLyricsFileParsingStrategyTests
     {
         const string relativePathToTestData = @"..\..\TestData\SimpleSong.xml";
 
         [TestCase]
         public void NullFails()
         {
-            Assert.Catch<ArgumentNullException>( delegate { new XmlLyricsFileParser(null); } );
+            Assert.Catch<ArgumentNullException>( delegate { new XmlLyricsFileParsingStrategy(null); } );
         }
 
         [TestCase]
         public void SimpleTest()
         {
-            XmlLyricsFileParser xmlLyricsFileParser = new XmlLyricsFileParser(relativePathToTestData);
+            XmlLyricsFileParsingStrategy xmlLyricsFileParser = new XmlLyricsFileParsingStrategy(relativePathToTestData);
             Assert.IsNotNull(xmlLyricsFileParser.DataPairs);
             Assert.AreEqual(6, xmlLyricsFileParser.DataPairs.Count);
 
@@ -38,7 +38,7 @@ namespace LyricUser.Test
         [TestCase]
         public void GetFavourite()
         {
-            bool favouriteValue = XmlLyricsFileParser.ReadValue<bool>(relativePathToTestData, "favourite");
+            bool favouriteValue = XmlLyricsFileParsingStrategy.ReadValue<bool>(relativePathToTestData, "favourite");
             Assert.AreEqual(true, favouriteValue);
         }
     }

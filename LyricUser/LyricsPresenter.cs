@@ -6,7 +6,7 @@ namespace LyricUser
 {
     public class LyricsPresenter : IPerformableLyrics
     {
-        public LyricsPresenter(XmlLyricsFileParser xmlLyricsFileParser)
+        public LyricsPresenter(XmlLyricsFileParsingStrategy xmlLyricsFileParser)
         {
             if (null == xmlLyricsFileParser)
             {

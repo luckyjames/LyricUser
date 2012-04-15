@@ -14,7 +14,7 @@ namespace LyricUser
     /// This is quite quick as it avoids looking for values by name
     /// This is also extensible
     /// </remarks>
-    public class XmlLyricsFileParser
+    public class XmlLyricsFileParsingStrategy
     {
         private readonly IDictionary<string, string> dataPairs;
 
@@ -71,7 +71,7 @@ namespace LyricUser
         /// Parse data on construction
         /// </summary>
         /// <param name="xmlFileUrl"></param>
-        public XmlLyricsFileParser(string xmlFileUrl)
+        public XmlLyricsFileParsingStrategy(string xmlFileUrl)
         {
             dataPairs = new Dictionary<string, string>(10);
 
