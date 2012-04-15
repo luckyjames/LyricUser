@@ -105,9 +105,11 @@ namespace LyricUser
                 case System.Windows.Forms.DialogResult.OK:
                     RootPath = dialog.SelectedPath;
                     break;
+                case System.Windows.Forms.DialogResult.Cancel:
+                    // Expected navigation cancel
+                    break;
                 case System.Windows.Forms.DialogResult.Yes:
                 case System.Windows.Forms.DialogResult.Abort:
-                case System.Windows.Forms.DialogResult.Cancel:
                 case System.Windows.Forms.DialogResult.Ignore:
                 case System.Windows.Forms.DialogResult.No:
                 case System.Windows.Forms.DialogResult.None:
