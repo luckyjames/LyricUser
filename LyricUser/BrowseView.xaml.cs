@@ -132,8 +132,14 @@ namespace LyricUser
         private void RepopulateTree(TreeView tree, string rootPath)
         {
             tree.Items.Clear();
-
-            tree.Items.Add(CreateItem(rootPath));
+            if (!Directory.Exists(rootPath))
+            {
+                tree.Items.Add("File not found - " + rootPath);
+            }
+            else
+            {
+                tree.Items.Add(CreateItem(rootPath));
+            }
         }
 
         private void fileTree_Initialized(object sender, EventArgs e)
