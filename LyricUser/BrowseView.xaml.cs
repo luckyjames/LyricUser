@@ -119,6 +119,9 @@ namespace LyricUser
 
         void fileTreeViewItem_MouseDoubleClick(object sender, MouseButtonEventArgs e)
         {
+            // Set handled to avoid re-selecting old view
+            e.Handled = true;
+
             // This code looks wrong refactoring required..
             App thisApp = Application.Current as App;
 
@@ -127,6 +130,8 @@ namespace LyricUser
 
             PerformanceView newView = new PerformanceView();
             newView.Show();
+
+            this.Dispatcher.BeginInvoke((Action)(() => { newView.Activate(); }));
         }
 
         private void RepopulateTree(TreeView tree, string rootPath)
