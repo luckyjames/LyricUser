@@ -12,6 +12,16 @@ namespace LyricUser
     /// </summary>
     public partial class BrowseView : Window
     {
+        private class LyricsTreeViewItem : TreeViewItem
+        {
+            private readonly string nodePath;
+
+            public LyricsTreeViewItem(string nodePath)
+            {
+                this.nodePath = nodePath;
+            }
+        }
+
         public BrowseView()
         {
             InitializeComponent();
@@ -45,6 +55,21 @@ namespace LyricUser
             }
         }
 
+        private static void AddTreeItem(ItemsControl itemsControl, TreeViewItem newItem)
+        {
+            itemsControl.Items.Add(newItem);
+            if (FontWeights.Normal != newItem.FontWeight)
+            {
+                // ensure all parent directories indicate favourites
+                TreeViewItem pointer = newItem.Parent as TreeViewItem;
+                while (null != pointer)
+                {
+                    pointer.FontWeight = newItem.FontWeight;
+                    pointer = pointer.Parent as TreeViewItem;
+                }
+            }
+        }
+
         void folderTreeViewItem_Expanded(object sender, RoutedEventArgs e)
         {
             TreeViewItem item = sender as TreeViewItem;
@@ -56,7 +81,7 @@ namespace LyricUser
 
                 foreach (string s in Directory.EnumerateFileSystemEntries(item.Tag.ToString()))
                 {
-                    item.Items.Add(CreateItem(s));
+                    AddTreeItem(item, CreateItem(s));
                 }
             }
         }
@@ -67,16 +92,16 @@ namespace LyricUser
             return parser.ReadValue<bool>("favourite");
         }
 
-        private TreeViewItem CreateItem(string itemPath)
+        private LyricsTreeViewItem CreateItem(string itemPath)
         {
-            TreeViewItem subitem = new TreeViewItem();
+            LyricsTreeViewItem subitem = new LyricsTreeViewItem(itemPath);
             subitem.Header = itemPath.Substring(itemPath.LastIndexOf("\\") + 1);
             subitem.Tag = itemPath;
 
             if (Directory.Exists(itemPath))
             {
                 // add a dummy sub-item so it can be expanded
-                subitem.Items.Add(new TreeViewItem());
+                subitem.Items.Add(new LyricsTreeViewItem(itemPath));
                 subitem.Expanded += new RoutedEventHandler(folderTreeViewItem_Expanded);
             }
             else if (File.Exists(itemPath))
@@ -125,7 +150,7 @@ namespace LyricUser
             }
             else
             {
-                tree.Items.Add(CreateItem(rootPath));
+                AddTreeItem(tree, CreateItem(rootPath));
             }
         }
 
