@@ -7,51 +7,6 @@ using System.Windows.Input;
 
 namespace LyricUser
 {
-    class LyricsFileSystemNode
-    {
-        private string nodePath;
-        public string NodePath
-        {
-            get
-            {
-                return nodePath;
-            }
-        }
-
-        public LyricsFileSystemNode(string nodePath)
-        {
-            this.nodePath = nodePath;
-        }
-    }
-
-    class LyricsFileSystem : FileSystemWatcher
-    {
-        private readonly LyricsFileSystemNode rootNode;
-
-        public LyricsFileSystem(string rootPath)
-        {
-            this.rootNode = new LyricsFileSystemNode(rootPath);
-            this.IncludeSubdirectories = true;
-            this.Filter = "*.xml";
-            this.Changed += new FileSystemEventHandler(LyricsFileSystem_Changed);
-            this.Created += new FileSystemEventHandler(LyricsFileSystem_Changed);
-            this.Deleted += new FileSystemEventHandler(LyricsFileSystem_Changed);
-            this.Renamed += new RenamedEventHandler(LyricsFileSystem_Renamed);
-        }
-
-        void LyricsFileSystem_Renamed(object sender, RenamedEventArgs e)
-        {
-            throw new NotImplementedException(
-                e.ChangeType.ToString() + " :" + e.OldFullPath + " -> " + e.FullPath);
-        }
-
-        void LyricsFileSystem_Changed(object sender, FileSystemEventArgs e)
-        {
-            throw new NotImplementedException(
-                e.ChangeType.ToString() + " :" + e.FullPath);
-        }
-    }
-
     /// <summary>
     /// Interaction logic for BrowseView.xaml
     /// </summary>
@@ -74,6 +29,19 @@ namespace LyricUser
                 rootPath = value;
 
                 RepopulateTree(this.fileTree, this.rootPath);
+            }
+        }
+
+        private bool favouritesVisible;
+        public bool FavouritesVisible
+        {
+            get
+            {
+                return favouritesVisible;
+            }
+            set
+            {
+                favouritesVisible = value;
             }
         }
 
@@ -174,6 +142,16 @@ namespace LyricUser
                 default:
                     throw new NotImplementedException(result.ToString());
             }
+        }
+
+        private void favouritesCheckBox_Checked(object sender, RoutedEventArgs e)
+        {
+            FavouritesVisible = true;
+        }
+
+        private void favouritesCheckBox_Unchecked(object sender, RoutedEventArgs e)
+        {
+            FavouritesVisible = false;
         }
     }
 }

@@ -12,7 +12,7 @@
     <DockPanel LastChildFill="True">
         <StackPanel DockPanel.Dock="Left" Name="bottonsPanel">
             <Button Name="browseButton" Content="..." Click="browseButton_Click" />
-            <Button Name="hideButton" Content="Hide" />
+            <CheckBox Name="favouritesCheckBox" Content="Favourites" Checked="favouritesCheckBox_Checked" Unchecked="favouritesCheckBox_Unchecked" />
         </StackPanel>
         <TreeView Name="fileTree" Initialized="fileTree_Initialized" />
     </DockPanel>
