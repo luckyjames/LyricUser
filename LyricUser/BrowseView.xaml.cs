@@ -121,6 +121,9 @@ namespace LyricUser
                 // add a dummy sub-item so it can be expanded
                 subitem.Items.Add(new LyricsTreeViewItem(itemPath));
                 subitem.Expanded += new RoutedEventHandler(folderTreeViewItem_Expanded);
+
+                // Ensure font weight is set so that it is not inherited
+                subitem.FontWeight = FontWeights.Normal;
             }
             else if (File.Exists(itemPath))
             {
