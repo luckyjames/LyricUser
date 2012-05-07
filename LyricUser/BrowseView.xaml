@@ -14,6 +14,6 @@
             <Button Name="browseButton" Content="..." Click="browseButton_Click" />
             <CheckBox Name="favouritesCheckBox" Content="Favourites" Checked="favouritesCheckBox_Checked" Unchecked="favouritesCheckBox_Unchecked" />
         </StackPanel>
-        <TreeView Name="fileTree" Initialized="fileTree_Initialized" />
+        <TreeView Name="fileTree" />
     </DockPanel>
 </Window>

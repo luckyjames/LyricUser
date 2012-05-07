@@ -25,6 +25,10 @@ namespace LyricUser
         public BrowseView()
         {
             InitializeComponent();
+
+            // Initialise root path with the last user folder after controls are constructed but
+            //  before it is set by the application using this form
+            RootPath = LyricUser.Properties.Settings.Default.LastOpenedLyricsFolder;
         }
 
         private string rootPath;
@@ -53,6 +57,13 @@ namespace LyricUser
             {
                 favouritesVisible = value;
             }
+        }
+
+        protected override void OnClosing(System.ComponentModel.CancelEventArgs e)
+        {
+            LyricUser.Properties.Settings.Default.LastOpenedLyricsFolder = RootPath;
+            LyricUser.Properties.Settings.Default.Save();
+            base.OnClosing(e); 
         }
 
         private static void AddTreeItem(ItemsControl itemsControl, TreeViewItem newItem)
@@ -88,8 +99,15 @@ namespace LyricUser
 
         private bool GetLyricsIsFavourite(string lyricsFilePath)
         {
-            XmlLyricsFileParsingStrategy parser = new XmlLyricsFileParsingStrategy(lyricsFilePath);
-            return parser.ReadValue<bool>("favourite");
+            if (".xml" != Path.GetExtension(lyricsFilePath))
+            {
+                return false;
+            }
+            else
+            {
+                XmlLyricsFileParsingStrategy parser = new XmlLyricsFileParsingStrategy(lyricsFilePath);
+                return parser.ReadValue<bool>("favourite");
+            }
         }
 
         private LyricsTreeViewItem CreateItem(string itemPath)
@@ -152,12 +170,6 @@ namespace LyricUser
             {
                 AddTreeItem(tree, CreateItem(rootPath));
             }
-        }
-
-        private void fileTree_Initialized(object sender, EventArgs e)
-        {
-            // Debug run directory
-            RootPath = @"..\..\..\LyricUser.Test\TestData";
         }
 
         private void browseButton_Click(object sender, RoutedEventArgs e)
