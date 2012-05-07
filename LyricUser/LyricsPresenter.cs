@@ -32,7 +32,7 @@ namespace LyricUser
                     }
                 }
 
-                // USe ReadOnlyCollection to ensure immutability
+                // Use ReadOnlyCollection to ensure immutability
                 metadata = new ReadOnlyCollection<KeyValuePair<string, string>>(incomingMetadata);
             }
         }

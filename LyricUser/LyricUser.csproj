@@ -74,6 +74,9 @@
       <DependentUpon>BrowseView.xaml</DependentUpon>
     </Compile>
     <Compile Include="IPerformableLyrics.cs" />
+    <Compile Include="LyricsFileSystem.cs">
+      <SubType>Component</SubType>
+    </Compile>
     <Compile Include="LyricsPresenter.cs" />
     <Compile Include="XmlLyricsFileParsingStrategy.cs" />
     <Page Include="AutoScalingTextBox.xaml">

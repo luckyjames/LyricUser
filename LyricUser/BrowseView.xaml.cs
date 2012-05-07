@@ -61,12 +61,18 @@ namespace LyricUser
             }
         }
 
+        private bool GetLyricsIsFavourite(string lyricsFilePath)
+        {
+            XmlLyricsFileParsingStrategy parser = new XmlLyricsFileParsingStrategy(lyricsFilePath);
+            return parser.ReadValue<bool>("favourite");
+        }
+
         private TreeViewItem CreateItem(string itemPath)
         {
             TreeViewItem subitem = new TreeViewItem();
             subitem.Header = itemPath.Substring(itemPath.LastIndexOf("\\") + 1);
             subitem.Tag = itemPath;
-            subitem.FontWeight = FontWeights.Normal;
+
             if (Directory.Exists(itemPath))
             {
                 // add a dummy sub-item so it can be expanded
@@ -76,6 +82,14 @@ namespace LyricUser
             else if (File.Exists(itemPath))
             {
                 subitem.MouseDoubleClick += new MouseButtonEventHandler(fileTreeViewItem_MouseDoubleClick);
+                if (GetLyricsIsFavourite(itemPath))
+                {
+                    subitem.FontWeight = FontWeights.Bold;
+                }
+                else
+                {
+                    subitem.FontWeight = FontWeights.Normal;
+                }
             }
             else
             {
