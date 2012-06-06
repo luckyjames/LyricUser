@@ -42,6 +42,10 @@ namespace LyricUser
             Exception theException = e.Exception;
             string traceFileName = "GeneratorTestbedError.txt";
             string allUsersAppDataFolder = Environment.GetFolderPath(Environment.SpecialFolder.CommonApplicationData);
+            if (string.IsNullOrEmpty(allUsersAppDataFolder))
+            {
+                allUsersAppDataFolder = Environment.GetFolderPath(Environment.SpecialFolder.Desktop);
+            }
             string theErrorPath = System.IO.Path.Combine(allUsersAppDataFolder, traceFileName);
             using (System.IO.TextWriter theTextWriter = new System.IO.StreamWriter(theErrorPath, true))
             {

@@ -97,6 +97,25 @@ namespace LyricUser
         /// <returns></returns>
         public ValueType ReadValue<ValueType>(string key)
         {
+            ValueType result;
+            if (!TryReadValue<ValueType>(key, out result))
+            {
+                throw new ApplicationException("key " + key + " could not be found");
+            }
+            else
+            {
+                return result;
+            }
+        }
+
+        /// <summary>
+        /// Finds the value corresponding to the specified key and converts it to the supplied generic type
+        /// </summary>
+        /// <typeparam name="ValueType"></typeparam>
+        /// <param name="key"></param>
+        /// <returns></returns>
+        public bool TryReadValue<ValueType>(string key, out ValueType value)
+        {
             if (null == key)
             {
                 throw new ArgumentNullException("key");
@@ -108,11 +127,17 @@ namespace LyricUser
                 {
                     // Read only until the desired key is found
                     allDataPairs = Implementation.ReadAll(xmlFileUrl, key);
+                    if (!allDataPairs.TryGetValue(key, out result))
+                    {
+                        value = default(ValueType);
 
-                    result = allDataPairs[key];
+                        return false;
+                    }
                 }
 
-                return Implementation.ConvertStringToValue<ValueType>(result);
+                value = Implementation.ConvertStringToValue<ValueType>(result);
+
+                return true;
             }
         }
 

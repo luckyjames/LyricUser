@@ -63,7 +63,7 @@ namespace LyricUser
         {
             LyricUser.Properties.Settings.Default.LastOpenedLyricsFolder = RootPath;
             LyricUser.Properties.Settings.Default.Save();
-            base.OnClosing(e); 
+            base.OnClosing(e);
         }
 
         private static void AddTreeItem(ItemsControl itemsControl, TreeViewItem newItem)
@@ -106,41 +106,57 @@ namespace LyricUser
             else
             {
                 XmlLyricsFileParsingStrategy parser = new XmlLyricsFileParsingStrategy(lyricsFilePath);
-                return parser.ReadValue<bool>("favourite");
+
+                bool result;
+                if (parser.TryReadValue<bool>("favourite", out result))
+                {
+                    return true;
+                }
+                else
+                {
+                    return false;
+                }
             }
         }
 
         private LyricsTreeViewItem CreateItem(string itemPath)
         {
             LyricsTreeViewItem subitem = new LyricsTreeViewItem(itemPath);
-            subitem.Header = itemPath.Substring(itemPath.LastIndexOf("\\") + 1);
+            subitem.Header = itemPath.Substring(itemPath.LastIndexOf(Path.DirectorySeparatorChar) + 1);
             subitem.Tag = itemPath;
-
-            if (Directory.Exists(itemPath))
+            try
             {
-                // add a dummy sub-item so it can be expanded
-                subitem.Items.Add(new LyricsTreeViewItem(itemPath));
-                subitem.Expanded += new RoutedEventHandler(folderTreeViewItem_Expanded);
-
-                // Ensure font weight is set so that it is not inherited
-                subitem.FontWeight = FontWeights.Normal;
-            }
-            else if (File.Exists(itemPath))
-            {
-                subitem.MouseDoubleClick += new MouseButtonEventHandler(fileTreeViewItem_MouseDoubleClick);
-                if (GetLyricsIsFavourite(itemPath))
+                if (Directory.Exists(itemPath))
                 {
-                    subitem.FontWeight = FontWeights.Bold;
+                    // add a dummy sub-item so it can be expanded
+                    subitem.Items.Add(new LyricsTreeViewItem(itemPath));
+                    subitem.Expanded += new RoutedEventHandler(folderTreeViewItem_Expanded);
+
+                    // Ensure font weight is set so that it is not inherited
+                    subitem.FontWeight = FontWeights.Normal;
+                }
+                else if (File.Exists(itemPath))
+                {
+                    subitem.MouseDoubleClick += new MouseButtonEventHandler(fileTreeViewItem_MouseDoubleClick);
+                    if (GetLyricsIsFavourite(itemPath))
+                    {
+                        subitem.FontWeight = FontWeights.Bold;
+                    }
+                    else
+                    {
+                        subitem.FontWeight = FontWeights.Normal;
+                    }
                 }
                 else
                 {
-                    subitem.FontWeight = FontWeights.Normal;
+                    throw new ApplicationException(
+                        "itemPath does not exist - " + itemPath + ". CD = " + Directory.GetCurrentDirectory());
                 }
             }
-            else
+            catch (System.Xml.XmlException xmlException)
             {
-                throw new ApplicationException(
-                    "itemPath does not exist - " + itemPath + ". CD = " + Directory.GetCurrentDirectory());
+                System.Windows.Forms.MessageBox.Show("Bad XML in " + itemPath + ":\n\n" + xmlException);
+                subitem.Foreground = System.Windows.Media.Brushes.Red;
             }
             return subitem;
         }
