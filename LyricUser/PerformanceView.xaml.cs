@@ -65,6 +65,8 @@ namespace LyricUser
             foreach (KeyValuePair<string, string> entry in lyricsPresenter.Metadata)
             {
                 TextBlock newKeyTextBlock = new TextBlock();
+                // add some padding above each metadata item
+                newKeyTextBlock.Padding = new Thickness(0, 10, 0, 0);
                 newKeyTextBlock.Text = entry.Key;
                 newKeyTextBlock.FontSize = 14;
                 newKeyTextBlock.Foreground = System.Windows.Media.Brushes.Black;
