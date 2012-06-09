@@ -17,7 +17,7 @@ namespace LyricUser
             InitializeComponent();
 
             // This code looks wrong refactoring required..
-            App thisApp = Application.Current as App;
+            LyricUserApplication thisApp = Application.Current as LyricUserApplication;
 
             if (null == lyricsPresenter)
             {

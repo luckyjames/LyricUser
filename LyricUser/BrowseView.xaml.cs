@@ -167,7 +167,7 @@ namespace LyricUser
             e.Handled = true;
 
             // This code looks wrong refactoring required..
-            App thisApp = Application.Current as App;
+            LyricUserApplication thisApp = Application.Current as LyricUserApplication;
 
             TreeViewItem senderItem = sender as TreeViewItem;
             thisApp.LyricsUrl = senderItem.Tag as string;

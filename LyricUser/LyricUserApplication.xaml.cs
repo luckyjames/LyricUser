@@ -4,9 +4,9 @@ using System;
 namespace LyricUser
 {
     /// <summary>
-    /// Interaction logic for App.xaml
+    /// Interaction logic for LyricUserApplication.xaml
     /// </summary>
-    public partial class App : Application
+    public partial class LyricUserApplication : Application
     {
         private string lyricsUrl;
         public string LyricsUrl
