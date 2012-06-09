@@ -8,16 +8,16 @@ namespace LyricUser
     /// </summary>
     public partial class LyricUserApplication : Application
     {
-        private string lyricsUrl;
-        public string LyricsUrl
+        private StartupEventArgs startupArguments;
+
+        /// <summary>
+        /// The arguments used to start this application
+        /// </summary>
+        public StartupEventArgs StartupArguments
         {
             get
             {
-                return lyricsUrl;
-            }
-            set
-            {
-                lyricsUrl = value;
+                return startupArguments;
             }
         }
 
@@ -25,14 +25,7 @@ namespace LyricUser
         {
             base.OnStartup(e);
 
-            if (e.Args.Length < 1)
-            {
-                System.Diagnostics.Debug.WriteLine("No arguments available.");
-            }
-            else
-            {
-                lyricsUrl = e.Args[0];
-            }
+            startupArguments = e;
         }
 
         private void LyricsViewerDispatcherUnhandledException(

@@ -166,16 +166,20 @@ namespace LyricUser
             // Set handled to avoid re-selecting old view
             e.Handled = true;
 
-            // This code looks wrong refactoring required..
-            LyricUserApplication thisApp = Application.Current as LyricUserApplication;
-
             TreeViewItem senderItem = sender as TreeViewItem;
-            thisApp.LyricsUrl = senderItem.Tag as string;
+            string filePathSelected = senderItem.Tag as string;
+            if (string.IsNullOrEmpty(filePathSelected))
+            {
+                throw new ApplicationException("BrowseView: no file selected");
+            }
+            else
+            {
+                PerformanceView newView = new PerformanceView(
+                    new LyricsPresenter(new XmlLyricsFileParsingStrategy(filePathSelected)));
+                newView.Show();
 
-            PerformanceView newView = new PerformanceView(new LyricsPresenter(new XmlLyricsFileParsingStrategy(thisApp.LyricsUrl)));
-            newView.Show();
-
-            this.Dispatcher.BeginInvoke((Action)(() => { newView.Activate(); }));
+                this.Dispatcher.BeginInvoke((Action)(() => { newView.Activate(); }));
+            }
         }
 
         private void RepopulateTree(TreeView tree, string rootPath)
