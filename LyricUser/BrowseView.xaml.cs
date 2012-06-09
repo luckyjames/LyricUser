@@ -172,7 +172,7 @@ namespace LyricUser
             TreeViewItem senderItem = sender as TreeViewItem;
             thisApp.LyricsUrl = senderItem.Tag as string;
 
-            PerformanceView newView = new PerformanceView();
+            PerformanceView newView = new PerformanceView(new LyricsPresenter(new XmlLyricsFileParsingStrategy(thisApp.LyricsUrl)));
             newView.Show();
 
             this.Dispatcher.BeginInvoke((Action)(() => { newView.Activate(); }));

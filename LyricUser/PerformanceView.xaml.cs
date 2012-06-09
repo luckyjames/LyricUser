@@ -12,20 +12,22 @@ namespace LyricUser
     /// </summary>
     public partial class PerformanceView : Window
     {
-        public PerformanceView()
+        internal PerformanceView(IPerformableLyrics lyricsPresenter)
         {
             InitializeComponent();
 
             // This code looks wrong refactoring required..
             App thisApp = Application.Current as App;
 
-            if (null == thisApp)
+            if (null == lyricsPresenter)
             {
                 throw new ApplicationException("MainWinow property has incorrect type!");
             }
             else
             {
-                this.LyricsPresenter = new LyricsPresenter(new XmlLyricsFileParsingStrategy(thisApp.LyricsUrl));
+                this.DataContext = lyricsPresenter;
+
+                PopulateWindow();
             }
         }
 
@@ -59,10 +61,10 @@ namespace LyricUser
 
         private void PopulateWindow()
         {
-            this.lyricsBox.Text = lyricsPresenter.Lyrics;
+            this.lyricsBox.Text = LyricsPresenter.Lyrics;
 
             // For each additional piece of data, push a new TextBlock into the StackPanel
-            foreach (KeyValuePair<string, string> entry in lyricsPresenter.Metadata)
+            foreach (KeyValuePair<string, string> entry in LyricsPresenter.Metadata)
             {
                 TextBlock newKeyTextBlock = new TextBlock();
                 // add some padding above each metadata item
@@ -80,18 +82,19 @@ namespace LyricUser
             }
         }
 
-        private IPerformableLyrics lyricsPresenter;
-        internal IPerformableLyrics LyricsPresenter
+        private IPerformableLyrics LyricsPresenter
         {
             get
             {
-                return lyricsPresenter;
-            }
-            set
-            {
-                lyricsPresenter = value;
-
-                PopulateWindow();
+                IPerformableLyrics result = this.DataContext as IPerformableLyrics;
+                if (null == result)
+                {
+                    throw new ApplicationException("PerformanceView: No lyrics to show");
+                }
+                else
+                {
+                    return result;
+                }
             }
         }
     }
