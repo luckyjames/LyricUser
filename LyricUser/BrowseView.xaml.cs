@@ -80,8 +80,29 @@ namespace LyricUser
                 }
                 catch (System.Xml.XmlException xmlException)
                 {
-                    //System.Windows.Forms.MessageBox.Show("Bad XML in " + nodePath + ":\n\n" + xmlException);
-                    System.Diagnostics.Debug.WriteLine("Bad XML in " + nodePath + ":\n\n" + xmlException);
+                    if (xmlException.Message.Contains("Invalid character in the given encoding."))
+                    {
+                        System.Diagnostics.Debug.WriteLine("Bad XML in " + nodePath + ":\n\n" + xmlException);
+
+                        // Read file trying to auto-detect encoding
+                        // Then change file to utf-16 encoding (unicode) and try again
+                        const bool detectEncodingFromByteOrderMarks = true;
+                        using (var reader = new StreamReader(nodePath, detectEncodingFromByteOrderMarks))
+                        {
+                            try
+                            {
+                                string xml = reader.ReadToEnd();
+                            }
+                            catch (System.Exception unrecoverableException)
+                            {
+                                System.Diagnostics.Debug.WriteLine("UNRECOVERABLE XML " + nodePath + ":\n\n" + unrecoverableException);
+                            }
+                        }
+                    }
+                    else
+                    {
+                        System.Windows.Forms.MessageBox.Show("Bad XML in " + nodePath + ":\n\n" + xmlException);
+                    }
                     this.Foreground = System.Windows.Media.Brushes.Red;
                 }
             }
