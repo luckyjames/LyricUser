@@ -4,6 +4,7 @@ using System.IO;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
+using System.Threading;
 
 namespace LyricUser
 {
@@ -12,6 +13,32 @@ namespace LyricUser
     /// </summary>
     public partial class BrowseView : Window
     {
+        private static void FindAllFavourites(Object stateInfo)
+        {
+            BrowseView view = ((BrowseView)stateInfo);
+
+            LyricsTreeViewItem rootItem = view.fileTree.Items[0] as LyricsTreeViewItem;
+
+            System.Windows.Threading.DispatcherOperation token
+                = view.Dispatcher.BeginInvoke((Action)(() => { rootItem.PopulateArtistTreeNode(); }));
+            token.Wait();
+
+            foreach (TreeViewItem artistItem in rootItem.Items)
+            {
+                if (artistItem is LyricsTreeViewItem)
+                {
+                    System.Windows.Threading.DispatcherOperation artistNodeToken
+                       = view.Dispatcher.BeginInvoke((Action)(() => { ((LyricsTreeViewItem)artistItem).PopulateArtistTreeNode(); }));
+                    artistNodeToken.Wait();
+                }
+            }
+        }
+
+        private void BeginFindAllFavourites()
+        {
+            ThreadPool.QueueUserWorkItem(new WaitCallback(FindAllFavourites), this);
+        }
+
         private class LyricsTreeViewItem : TreeViewItem
         {
             private readonly string nodePath;
@@ -19,6 +46,86 @@ namespace LyricUser
             public LyricsTreeViewItem(string nodePath)
             {
                 this.nodePath = nodePath;
+
+                this.Header = nodePath.Substring(nodePath.LastIndexOf(Path.DirectorySeparatorChar) + 1);
+                this.Tag = nodePath;
+                try
+                {
+                    if (Directory.Exists(nodePath))
+                    {
+                        // add a dummy sub-item so it can be expanded
+                        this.Items.Add(new TreeViewItem());
+                        this.Expanded += new RoutedEventHandler(folderTreeViewItem_Expanded);
+
+                        // Ensure font weight is set so that it is not inherited
+                        this.FontWeight = FontWeights.Normal;
+                    }
+                    else if (File.Exists(nodePath))
+                    {
+                        this.MouseDoubleClick += new MouseButtonEventHandler(fileTreeViewItem_MouseDoubleClick);
+                        if (GetLyricsIsFavourite(nodePath))
+                        {
+                            this.FontWeight = FontWeights.Bold;
+                        }
+                        else
+                        {
+                            this.FontWeight = FontWeights.Normal;
+                        }
+                    }
+                    else
+                    {
+                        throw new ApplicationException(
+                            "itemPath does not exist - " + nodePath + ". CD = " + Directory.GetCurrentDirectory());
+                    }
+                }
+                catch (System.Xml.XmlException xmlException)
+                {
+                    //System.Windows.Forms.MessageBox.Show("Bad XML in " + nodePath + ":\n\n" + xmlException);
+                    System.Diagnostics.Debug.WriteLine("Bad XML in " + nodePath + ":\n\n" + xmlException);
+                    this.Foreground = System.Windows.Media.Brushes.Red;
+                }
+            }
+
+            public void PopulateArtistTreeNode()
+            {
+                if (this.Items.Count == 1 && string.IsNullOrEmpty(((TreeViewItem)this.Items[0]).Tag as string))
+                {
+                    // only one child with no text - this is the first expansion
+                    this.Items.Clear();
+
+                    foreach (string s in Directory.EnumerateFileSystemEntries(this.Tag.ToString()))
+                    {
+                        AddTreeItem(this, new LyricsTreeViewItem(s));
+                    }
+                }
+            }
+
+            private void folderTreeViewItem_Expanded(object sender, RoutedEventArgs e)
+            {
+                TreeViewItem item = sender as TreeViewItem;
+
+                PopulateArtistTreeNode();
+            }
+
+            private void fileTreeViewItem_MouseDoubleClick(object sender, MouseButtonEventArgs e)
+            {
+                // Set handled to avoid re-selecting old view
+                e.Handled = true;
+
+                TreeViewItem senderItem = sender as TreeViewItem;
+                string filePathSelected = senderItem.Tag as string;
+                if (string.IsNullOrEmpty(filePathSelected))
+                {
+                    throw new ApplicationException("BrowseView: no file selected");
+                }
+                else
+                {
+                    PerformanceView newView = new PerformanceView(
+                        new LyricsPresenter(new XmlLyricsFileParsingStrategy(filePathSelected)));
+                    newView.Show();
+
+                    this.Dispatcher.BeginInvoke((Action)(() => { newView.Activate(); }));
+                }
             }
         }
 
@@ -81,23 +188,7 @@ namespace LyricUser
             }
         }
 
-        void folderTreeViewItem_Expanded(object sender, RoutedEventArgs e)
-        {
-            TreeViewItem item = sender as TreeViewItem;
-
-            if (item.Items.Count == 1 && string.IsNullOrEmpty(((TreeViewItem)item.Items[0]).Tag as string))
-            {
-                // only one child with no text - this is the first expansion
-                item.Items.Clear();
-
-                foreach (string s in Directory.EnumerateFileSystemEntries(item.Tag.ToString()))
-                {
-                    AddTreeItem(item, CreateItem(s));
-                }
-            }
-        }
-
-        private bool GetLyricsIsFavourite(string lyricsFilePath)
+        static private bool GetLyricsIsFavourite(string lyricsFilePath)
         {
             if (".xml" != Path.GetExtension(lyricsFilePath))
             {
@@ -119,69 +210,6 @@ namespace LyricUser
             }
         }
 
-        private LyricsTreeViewItem CreateItem(string itemPath)
-        {
-            LyricsTreeViewItem subitem = new LyricsTreeViewItem(itemPath);
-            subitem.Header = itemPath.Substring(itemPath.LastIndexOf(Path.DirectorySeparatorChar) + 1);
-            subitem.Tag = itemPath;
-            try
-            {
-                if (Directory.Exists(itemPath))
-                {
-                    // add a dummy sub-item so it can be expanded
-                    subitem.Items.Add(new LyricsTreeViewItem(itemPath));
-                    subitem.Expanded += new RoutedEventHandler(folderTreeViewItem_Expanded);
-
-                    // Ensure font weight is set so that it is not inherited
-                    subitem.FontWeight = FontWeights.Normal;
-                }
-                else if (File.Exists(itemPath))
-                {
-                    subitem.MouseDoubleClick += new MouseButtonEventHandler(fileTreeViewItem_MouseDoubleClick);
-                    if (GetLyricsIsFavourite(itemPath))
-                    {
-                        subitem.FontWeight = FontWeights.Bold;
-                    }
-                    else
-                    {
-                        subitem.FontWeight = FontWeights.Normal;
-                    }
-                }
-                else
-                {
-                    throw new ApplicationException(
-                        "itemPath does not exist - " + itemPath + ". CD = " + Directory.GetCurrentDirectory());
-                }
-            }
-            catch (System.Xml.XmlException xmlException)
-            {
-                System.Windows.Forms.MessageBox.Show("Bad XML in " + itemPath + ":\n\n" + xmlException);
-                subitem.Foreground = System.Windows.Media.Brushes.Red;
-            }
-            return subitem;
-        }
-
-        void fileTreeViewItem_MouseDoubleClick(object sender, MouseButtonEventArgs e)
-        {
-            // Set handled to avoid re-selecting old view
-            e.Handled = true;
-
-            TreeViewItem senderItem = sender as TreeViewItem;
-            string filePathSelected = senderItem.Tag as string;
-            if (string.IsNullOrEmpty(filePathSelected))
-            {
-                throw new ApplicationException("BrowseView: no file selected");
-            }
-            else
-            {
-                PerformanceView newView = new PerformanceView(
-                    new LyricsPresenter(new XmlLyricsFileParsingStrategy(filePathSelected)));
-                newView.Show();
-
-                this.Dispatcher.BeginInvoke((Action)(() => { newView.Activate(); }));
-            }
-        }
-
         private void RepopulateTree(TreeView tree, string rootPath)
         {
             tree.Items.Clear();
@@ -191,7 +219,10 @@ namespace LyricUser
             }
             else
             {
-                AddTreeItem(tree, CreateItem(rootPath));
+                AddTreeItem(tree, new LyricsTreeViewItem(rootPath));
+
+                // Once tree populated, start background thread to find favourites
+                BeginFindAllFavourites();
             }
         }
 

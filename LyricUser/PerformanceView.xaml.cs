@@ -21,7 +21,7 @@ namespace LyricUser
 
             if (null == lyricsPresenter)
             {
-                throw new ApplicationException("MainWinow property has incorrect type!");
+                throw new ApplicationException("MainWindow property has incorrect type!");
             }
             else
             {
