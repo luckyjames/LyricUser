@@ -65,6 +65,7 @@ namespace LyricUser
                         this.MouseDoubleClick += new MouseButtonEventHandler(fileTreeViewItem_MouseDoubleClick);
                         if (GetLyricsIsFavourite(nodePath))
                         {
+                            System.Diagnostics.Debug.WriteLine("Favourite found: " + nodePath);
                             this.FontWeight = FontWeights.Bold;
                         }
                         else
@@ -80,6 +81,7 @@ namespace LyricUser
                 }
                 catch (System.Xml.XmlException xmlException)
                 {
+                    System.Diagnostics.Debug.WriteLine("Bad XML in " + nodePath + ":\n\n" + xmlException);
                     if (xmlException.Message.Contains("Invalid character in the given encoding."))
                     {
                         System.Diagnostics.Debug.WriteLine("Bad XML in " + nodePath + ":\n\n" + xmlException);
@@ -98,10 +100,6 @@ namespace LyricUser
                                 System.Diagnostics.Debug.WriteLine("UNRECOVERABLE XML " + nodePath + ":\n\n" + unrecoverableException);
                             }
                         }
-                    }
-                    else
-                    {
-                        System.Windows.Forms.MessageBox.Show("Bad XML in " + nodePath + ":\n\n" + xmlException);
                     }
                     this.Foreground = System.Windows.Media.Brushes.Red;
                 }
@@ -222,7 +220,7 @@ namespace LyricUser
                 bool result;
                 if (parser.TryReadValue<bool>("favourite", out result))
                 {
-                    return true;
+                    return result;
                 }
                 else
                 {
