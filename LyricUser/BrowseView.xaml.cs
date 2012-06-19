@@ -79,13 +79,15 @@ namespace LyricUser
                             "itemPath does not exist - " + nodePath + ". CD = " + Directory.GetCurrentDirectory());
                     }
                 }
-                catch (System.Xml.XmlException xmlException)
+                catch (System.Exception exception)
                 {
-                    System.Diagnostics.Debug.WriteLine("Bad XML in " + nodePath + ":\n\n" + xmlException);
-                    if (xmlException.Message.Contains("Invalid character in the given encoding."))
-                    {
-                        System.Diagnostics.Debug.WriteLine("Bad XML in " + nodePath + ":\n\n" + xmlException);
+                    System.Diagnostics.Debug.WriteLine("Bad XML in " + nodePath + ":\n\n" + exception);
+                    this.Foreground = System.Windows.Media.Brushes.Red;
 
+                    System.Xml.XmlException xmlException = exception as System.Xml.XmlException;
+                    if (!object.ReferenceEquals(null, xmlException)
+                        && xmlException.Message.Contains("Invalid character in the given encoding."))
+                    {
                         // Read file trying to auto-detect encoding
                         // Then change file to utf-16 encoding (unicode) and try again
                         const bool detectEncodingFromByteOrderMarks = true;
@@ -101,7 +103,6 @@ namespace LyricUser
                             }
                         }
                     }
-                    this.Foreground = System.Windows.Media.Brushes.Red;
                 }
             }
 
@@ -217,15 +218,7 @@ namespace LyricUser
             {
                 XmlLyricsFileParsingStrategy parser = new XmlLyricsFileParsingStrategy(lyricsFilePath);
 
-                bool result;
-                if (parser.TryReadValue<bool>("favourite", out result))
-                {
-                    return result;
-                }
-                else
-                {
-                    return false;
-                }
+                return parser.GetLyricsIsFavourite();
             }
         }
 

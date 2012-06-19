@@ -114,7 +114,7 @@ namespace LyricUser
         /// <typeparam name="ValueType"></typeparam>
         /// <param name="key"></param>
         /// <returns></returns>
-        public bool TryReadValue<ValueType>(string key, out ValueType value)
+        private bool TryReadValue<ValueType>(string key, out ValueType value)
         {
             if (null == key)
             {
@@ -122,12 +122,12 @@ namespace LyricUser
             }
             else
             {
-                string result;
-                if (object.ReferenceEquals(null, allDataPairs) || !allDataPairs.TryGetValue(key, out result))
+                string stringValueFound;
+                if (object.ReferenceEquals(null, allDataPairs) || !allDataPairs.TryGetValue(key, out stringValueFound))
                 {
                     // Read only until the desired key is found
                     allDataPairs = Implementation.ReadAll(xmlFileUrl, key);
-                    if (!allDataPairs.TryGetValue(key, out result))
+                    if (!allDataPairs.TryGetValue(key, out stringValueFound))
                     {
                         value = default(ValueType);
 
@@ -135,9 +135,32 @@ namespace LyricUser
                     }
                 }
 
-                value = Implementation.ConvertStringToValue<ValueType>(result);
+                try
+                {
+                    value = Implementation.ConvertStringToValue<ValueType>(stringValueFound);
 
-                return true;
+                    return true;
+                }
+                catch (System.FormatException formatException)
+                {
+                    System.Diagnostics.Debug.WriteLine(
+                        "Bad value '" + stringValueFound + "' for " + key + " in " + xmlFileUrl + ":\n\n" + formatException);
+
+                    throw formatException;
+                }
+            }
+        }
+
+        public bool GetLyricsIsFavourite()
+        {
+            bool result;
+            if (this.TryReadValue<bool>("favourite", out result))
+            {
+                return result;
+            }
+            else
+            {
+                return false;
             }
         }
 
