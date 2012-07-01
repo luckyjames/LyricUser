@@ -165,7 +165,7 @@ namespace LyricUser
 
         public Nullable<bool> HasDescendentsThatAreFavourites()
         {
-            if (this.isFavourite.HasValue && this.isFavourite.Value)
+            if (this.isFavourite.HasValue)
             {
                 // If current node has determined value, stop recursion
                 return this.isFavourite;
