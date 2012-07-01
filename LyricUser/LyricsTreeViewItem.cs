@@ -173,18 +173,41 @@ namespace LyricUser
             else
             {
                 // must be a folder, and not populated yet, look in all descendents
-                foreach (TreeViewItem child in this.Items)
+                if (1 > this.Items.Count)
                 {
-                    LyricsTreeViewItem childLyricsTreeViewItem = child as LyricsTreeViewItem;
-                    if (!object.ReferenceEquals(null, childLyricsTreeViewItem))
-                    {
-                        Nullable<bool> childResult = childLyricsTreeViewItem.HasDescendentsThatAreFavourites();
-                        if (childResult.HasValue && childResult.Value)
-                            return true;
-                    }
+                    // not populated or empty
+                    return null;
                 }
+                else
+                {
+                    foreach (TreeViewItem child in this.Items)
+                    {
+                        LyricsTreeViewItem childLyricsTreeViewItem = child as LyricsTreeViewItem;
+                        if (object.ReferenceEquals(null, childLyricsTreeViewItem))
+                        {
+                            // child is not a lyrics tree item, ssume it is a dummy..
+                            return null;
+                        }
+                        else
+                        {
+                            Nullable<bool> childResult = childLyricsTreeViewItem.HasDescendentsThatAreFavourites();
+                            if (!childResult.HasValue)
+                            {
+                                // we don't know about something
+                                return null;
+                            }
+                            else
+                            {
+                                // the current child knows..
+                                if (childResult.Value)
+                                    return true;
+                            }
+                        }
+                    }
 
-                return null;
+                    // all children know whether they are favourites, and none were..
+                    return false;
+                }
             }
         }
 
@@ -199,6 +222,9 @@ namespace LyricUser
                 {
                     AddTreeItem(this, new LyricsTreeViewItem(s));
                 }
+
+                Nullable<bool> descendantsAreFavourites = HasDescendentsThatAreFavourites();
+                this.IsInvisible = (descendantsAreFavourites.HasValue && !descendantsAreFavourites.Value);
             }
         }
 
