@@ -145,5 +145,36 @@ namespace LyricUser
                 }
             }
         }
+
+        static bool PromptToSave(string fileName)
+        {
+            System.Windows.Forms.DialogResult result = System.Windows.Forms.MessageBox.Show(
+                "Save?", fileName, System.Windows.Forms.MessageBoxButtons.OKCancel);
+            switch (result)
+            {
+                case System.Windows.Forms.DialogResult.OK:
+                    return true;
+                case System.Windows.Forms.DialogResult.Cancel:
+                    // Expected navigation cancel
+                    return false;
+                case System.Windows.Forms.DialogResult.Yes:
+                case System.Windows.Forms.DialogResult.Abort:
+                case System.Windows.Forms.DialogResult.Ignore:
+                case System.Windows.Forms.DialogResult.No:
+                case System.Windows.Forms.DialogResult.None:
+                case System.Windows.Forms.DialogResult.Retry:
+                default:
+                    throw new NotImplementedException(result.ToString());
+            }
+        }
+
+        protected override void OnClosing(System.ComponentModel.CancelEventArgs e)
+        {
+            if (LyricsPresenter.IsModified && PromptToSave(LyricsPresenter.FileName))
+            {
+                throw new NotImplementedException("SAVING NOT IMPLEMENTED");
+            }
+            base.OnClosing(e);
+        }
     }
 }
