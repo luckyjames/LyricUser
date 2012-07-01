@@ -19,16 +19,19 @@ namespace LyricUser
 
             LyricsTreeViewItem rootItem = view.fileTree.Items[0] as LyricsTreeViewItem;
 
-            System.Windows.Threading.DispatcherOperation token
-                = view.Dispatcher.BeginInvoke((Action)(() => { rootItem.PopulateArtistTreeNode(); }));
+            // This code is expected to be called on the threadpool, invoke using the dispatcher and wait for the result
+            System.Windows.Threading.DispatcherOperation token = view.Dispatcher.BeginInvoke(
+                (Action)(() => { rootItem.PopulateArtistTreeNode(); }));
             token.Wait();
 
-            foreach (TreeViewItem artistItem in rootItem.Items)
+            foreach (TreeViewItem descendent in rootItem.Items)
             {
-                if (artistItem is LyricsTreeViewItem)
+                LyricsTreeViewItem artistItem = descendent as LyricsTreeViewItem;
+                if (!object.ReferenceEquals(null, artistItem))
                 {
-                    System.Windows.Threading.DispatcherOperation artistNodeToken
-                       = view.Dispatcher.BeginInvoke((Action)(() => { ((LyricsTreeViewItem)artistItem).PopulateArtistTreeNode(); }));
+                    System.Windows.Threading.DispatcherOperation artistNodeToken = view.Dispatcher.BeginInvoke(
+                        (Action)(() => { artistItem.PopulateArtistTreeNode(); }));
+                    // No need to wait for the artist node population to finish before queueing the next one
                     artistNodeToken.Wait();
                 }
             }
@@ -62,8 +65,10 @@ namespace LyricUser
                     }
                     else if (File.Exists(nodePath))
                     {
+                        bool isFavourite = GetLyricsIsFavourite(nodePath);
+
                         this.MouseDoubleClick += new MouseButtonEventHandler(fileTreeViewItem_MouseDoubleClick);
-                        if (GetLyricsIsFavourite(nodePath))
+                        if (isFavourite)
                         {
                             System.Diagnostics.Debug.WriteLine("Favourite found: " + nodePath);
                             this.FontWeight = FontWeights.Bold;
@@ -71,6 +76,11 @@ namespace LyricUser
                         else
                         {
                             this.FontWeight = FontWeights.Normal;
+                        }
+
+                        if (!isFavourite)
+                        {
+                            this.Height = 0;
                         }
                     }
                     else
@@ -81,26 +91,50 @@ namespace LyricUser
                 }
                 catch (System.Exception exception)
                 {
-                    System.Diagnostics.Debug.WriteLine("Bad XML in " + nodePath + ":\n\n" + exception);
                     this.Foreground = System.Windows.Media.Brushes.Red;
 
                     System.Xml.XmlException xmlException = exception as System.Xml.XmlException;
-                    if (!object.ReferenceEquals(null, xmlException)
-                        && xmlException.Message.Contains("Invalid character in the given encoding."))
+                    if (object.ReferenceEquals(null, xmlException))
                     {
-                        // Read file trying to auto-detect encoding
-                        // Then change file to utf-16 encoding (unicode) and try again
-                        const bool detectEncodingFromByteOrderMarks = true;
-                        using (var reader = new StreamReader(nodePath, detectEncodingFromByteOrderMarks))
+                        System.Diagnostics.Debug.WriteLine("UNRECOVERABLE Non-XML Exception: " + exception);
+                        // Unexpected exception; re-throw
+                        //throw;
+                    }
+                    else
+                    {
+                        System.Diagnostics.Debug.WriteLine("\nBad XML in " + nodePath + ":\n" + exception);
+                        if (xmlException.Message.Contains("Invalid character in the given encoding."))
                         {
-                            try
+                            // Read file trying to auto-detect encoding
+                            // Then change file to utf-16 encoding (unicode) and try again
+                            const bool detectEncodingFromByteOrderMarks = true;
+                            using (var reader = new StreamReader(nodePath, detectEncodingFromByteOrderMarks))
                             {
-                                string xml = reader.ReadToEnd();
+                                try
+                                {
+                                    string xml = reader.ReadToEnd();
+                                }
+                                catch (System.Exception unrecoverableException)
+                                {
+                                    System.Diagnostics.Debug.WriteLine("UNRECOVERABLE because" + unrecoverableException);
+                                    throw;
+                                }
                             }
-                            catch (System.Exception unrecoverableException)
-                            {
-                                System.Diagnostics.Debug.WriteLine("UNRECOVERABLE XML " + nodePath + ":\n\n" + unrecoverableException);
-                            }
+                        }
+                        else if (xmlException.Message.Contains("An error occurred while parsing EntityName."))
+                        {
+                            // This can be cause by ampersands in unescaped text
+                            System.Diagnostics.Debug.WriteLine("Unimplemented XML format fix");
+                        }
+                        else if (xmlException.Message.Contains("Reference to undeclared entity"))
+                        {
+                            // This can be cause by html literals e.g. &egarve;
+                            System.Diagnostics.Debug.WriteLine("Unimplemented XML format fix");
+                        }
+                        else
+                        {
+                            // Can't recover from this, rethrow..
+                            throw;
                         }
                     }
                 }

@@ -32,7 +32,6 @@ namespace LyricUser
             object sender,
             System.Windows.Threading.DispatcherUnhandledExceptionEventArgs e)
         {
-            Exception theException = e.Exception;
             string traceFileName = "GeneratorTestbedError.txt";
             string allUsersAppDataFolder = Environment.GetFolderPath(Environment.SpecialFolder.CommonApplicationData);
             if (string.IsNullOrEmpty(allUsersAppDataFolder))
@@ -44,13 +43,14 @@ namespace LyricUser
             {
                 DateTime theNow = DateTime.Now;
                 theTextWriter.WriteLine("The error time: " + theNow.ToShortDateString() + " " + theNow.ToShortTimeString());
-                while (theException != null)
+                Exception innerExceptionReference = e.Exception;
+                while (innerExceptionReference != null)
                 {
-                    theTextWriter.WriteLine("Exception: " + theException.ToString());
-                    theException = theException.InnerException;
+                    theTextWriter.WriteLine("Exception: " + e.Exception.ToString());
+                    innerExceptionReference = e.Exception.InnerException;
                 }
             }
-            MessageBox.Show("The program crashed. A stack trace can be found at:\n" + theErrorPath + "\n\nClosing the application..");
+            MessageBox.Show(string.Format("The program crashed. A stack trace can be found at:\n{0}\n\nException:\n{1}\n\nClosing the application..", theErrorPath, e.Exception.ToString()));
             e.Handled = true;
             Application.Current.Shutdown();
         }
