@@ -8,8 +8,14 @@ namespace LyricUser
     /// </summary>
     internal interface IPerformableLyrics
     {
-        string Lyrics { get; }
+        bool IsModified { get; }
+
+        string FileName { get; }
+
+        string Lyrics { get; set; }
 
         ICollection<KeyValuePair<string, string>> Metadata { get; }
+
+        void SetMetadata(string metadataName, string newValue);
     }
 }

@@ -139,6 +139,10 @@ namespace LyricUser
                         // This can be cause by html literals e.g. &egarve;
                         System.Diagnostics.Debug.WriteLine("Unimplemented XML format fix");
                     }
+                    else if (xmlException.Message.Contains("Invalid syntax for a decimal numeric entity reference"))
+                    {
+                        System.Diagnostics.Debug.WriteLine("Unimplemented XML format fix");
+                    }
                     else
                     {
                         // Can't recover from this, rethrow..

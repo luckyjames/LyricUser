@@ -23,9 +23,18 @@ namespace LyricUser
             else
             {
                 this.DataContext = lyricsPresenter;
-
+                UpdateTitle();
                 PopulateWindow();
             }
+        }
+        
+        private void UpdateTitle()
+        {
+            IPerformableLyrics lyricsPresenter = LyricsPresenter;
+            
+            string modifiedIndicator = (lyricsPresenter.IsModified)? "* " : "";
+
+            this.Title = modifiedIndicator + lyricsPresenter.FileName;
         }
 
         private void ToggleMaxmised()
@@ -72,11 +81,36 @@ namespace LyricUser
                 this.metadataStackPanel.Children.Add(newKeyTextBlock);
 
                 TextBox newValueTextBlock = new TextBox();
+                newValueTextBlock.Tag = entry.Key;
                 newValueTextBlock.Text = entry.Value;
                 newValueTextBlock.FontSize = 14;
                 newValueTextBlock.Background = System.Windows.Media.Brushes.White;
                 newValueTextBlock.Foreground = System.Windows.Media.Brushes.Black;
+                newValueTextBlock.TextChanged += new TextChangedEventHandler(newValueTextBlock_TextChanged);
                 this.metadataStackPanel.Children.Add(newValueTextBlock);
+            }
+        }
+
+        private void newValueTextBlock_TextChanged(object sender, TextChangedEventArgs e)
+        {
+            TextBox changedTextBox = sender as TextBox;
+            if (object.ReferenceEquals(null, changedTextBox))
+            {
+                throw new ApplicationException("Sender was not a textbox");
+            }
+            else
+            {
+                string attributeName = changedTextBox.Tag as string;
+                if (object.ReferenceEquals(null, attributeName))
+                {
+                    throw new ApplicationException("Sender Tag was not a string");
+                }
+                else
+                {
+                    LyricsPresenter.SetMetadata(attributeName, changedTextBox.Text);
+
+                    UpdateTitle();
+                }
             }
         }
 

@@ -17,6 +17,13 @@ namespace LyricUser
     public class XmlLyricsFileParsingStrategy
     {
         private readonly string xmlFileUrl;
+        public string XmlFileUrl
+        {
+            get
+            {
+                return this.xmlFileUrl;
+            }
+        }
 
         private IDictionary<string, string> allDataPairs;
 
