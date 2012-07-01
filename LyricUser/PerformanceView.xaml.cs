@@ -71,10 +71,11 @@ namespace LyricUser
                 newKeyTextBlock.Foreground = System.Windows.Media.Brushes.Black;
                 this.metadataStackPanel.Children.Add(newKeyTextBlock);
 
-                TextBlock newValueTextBlock = new TextBlock();
+                TextBox newValueTextBlock = new TextBox();
                 newValueTextBlock.Text = entry.Value;
                 newValueTextBlock.FontSize = 14;
-                newValueTextBlock.Foreground = System.Windows.Media.Brushes.White;
+                newValueTextBlock.Background = System.Windows.Media.Brushes.White;
+                newValueTextBlock.Foreground = System.Windows.Media.Brushes.Black;
                 this.metadataStackPanel.Children.Add(newValueTextBlock);
             }
         }

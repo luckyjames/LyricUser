@@ -7,11 +7,12 @@
              d:DesignHeight="300"
              d:DesignWidth="300">
     <Viewbox HorizontalAlignment="Center" Name="textViewBox" VerticalAlignment="Center" Stretch="Uniform">
-        <TextBlock
+        <TextBox
             Name="lyricsTextBlock"
             Text="Text Value"
             HorizontalAlignment="Stretch"
             VerticalAlignment="Stretch"
-            TextAlignment="Center" />
+            TextAlignment="Center"
+            BorderThickness="0" />
     </Viewbox>
 </UserControl>
