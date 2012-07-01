@@ -68,6 +68,7 @@ namespace LyricUser
         private void PopulateWindow()
         {
             this.lyricsBox.Text = LyricsPresenter.Lyrics;
+            this.lyricsBox.TextChanged += new TextChangedEventHandler(lyricsBox_TextChanged);
 
             // For each additional piece of data, push a new TextBlock into the StackPanel
             foreach (KeyValuePair<string, string> entry in LyricsPresenter.Metadata)
@@ -88,6 +89,21 @@ namespace LyricUser
                 newValueTextBlock.Foreground = System.Windows.Media.Brushes.Black;
                 newValueTextBlock.TextChanged += new TextChangedEventHandler(newValueTextBlock_TextChanged);
                 this.metadataStackPanel.Children.Add(newValueTextBlock);
+            }
+        }
+
+        private void lyricsBox_TextChanged(object sender, TextChangedEventArgs e)
+        {
+            TextBox changedTextBox = sender as TextBox;
+            if (object.ReferenceEquals(null, changedTextBox))
+            {
+                throw new ApplicationException("Sender was not a textbox");
+            }
+            else
+            {
+                LyricsPresenter.Lyrics = changedTextBox.Text;
+
+                UpdateTitle();
             }
         }
 

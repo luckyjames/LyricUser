@@ -25,6 +25,18 @@ namespace LyricUser
             }
         }
 
+        public event TextChangedEventHandler TextChanged
+        {
+            add
+            {
+                this.lyricsTextBlock.TextChanged += value;
+            }
+            remove
+            {
+                this.lyricsTextBlock.TextChanged -= value;
+            }
+        }
+
         public static readonly DependencyProperty InfoTextProperty =
            DependencyProperty.Register(
               "InfoText",
