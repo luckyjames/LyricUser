@@ -16,12 +16,9 @@ namespace LyricUser
         {
             InitializeComponent();
 
-            // This code looks wrong refactoring required..
-            LyricUserApplication thisApp = Application.Current as LyricUserApplication;
-
             if (null == lyricsPresenter)
             {
-                throw new ApplicationException("MainWindow property has incorrect type!");
+                throw new ApplicationException("Performance view requires lyrics!");
             }
             else
             {
