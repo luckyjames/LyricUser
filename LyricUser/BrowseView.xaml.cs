@@ -19,9 +19,10 @@ namespace LyricUser
 
             LyricsTreeViewItem rootItem = view.fileTree.Items[0] as LyricsTreeViewItem;
 
-            // This code is expected to be called on the threadpool, invoke using the dispatcher and wait for the result
+            // This code is expected to be called on the threadpool, invoke using the dispatcher and
+            //  wait for the result
             System.Windows.Threading.DispatcherOperation token = view.Dispatcher.BeginInvoke(
-                (Action)(() => { rootItem.PopulateArtistTreeNode(); }));
+                (Action)(() => { rootItem.PopulateFolderNode(); }));
             token.Wait();
 
             foreach (TreeViewItem descendent in rootItem.Items)
@@ -30,8 +31,9 @@ namespace LyricUser
                 if (!object.ReferenceEquals(null, artistItem))
                 {
                     System.Windows.Threading.DispatcherOperation artistNodeToken = view.Dispatcher.BeginInvoke(
-                        (Action)(() => { artistItem.PopulateArtistTreeNode(); }));
-                    // No need to wait for the artist node population to finish before queueing the next one
+                        (Action)(() => { artistItem.PopulateFolderNode(); }));
+                    // Wait for the artist node population to finish before queueing the next one, otherwise
+                    //  the GUI becomes very unresponsive
                     artistNodeToken.Wait();
                 }
             }
@@ -40,147 +42,6 @@ namespace LyricUser
         private void BeginFindAllFavourites()
         {
             ThreadPool.QueueUserWorkItem(new WaitCallback(FindAllFavourites), this);
-        }
-
-        private class LyricsTreeViewItem : TreeViewItem
-        {
-            private readonly string nodePath;
-
-            public LyricsTreeViewItem(string nodePath)
-            {
-                this.nodePath = nodePath;
-
-                this.Header = nodePath.Substring(nodePath.LastIndexOf(Path.DirectorySeparatorChar) + 1);
-                this.Tag = nodePath;
-                try
-                {
-                    if (Directory.Exists(nodePath))
-                    {
-                        // add a dummy sub-item so it can be expanded
-                        this.Items.Add(new TreeViewItem());
-                        this.Expanded += new RoutedEventHandler(folderTreeViewItem_Expanded);
-
-                        // Ensure font weight is set so that it is not inherited
-                        this.FontWeight = FontWeights.Normal;
-                    }
-                    else if (File.Exists(nodePath))
-                    {
-                        bool isFavourite = GetLyricsIsFavourite(nodePath);
-
-                        this.MouseDoubleClick += new MouseButtonEventHandler(fileTreeViewItem_MouseDoubleClick);
-                        if (isFavourite)
-                        {
-                            System.Diagnostics.Debug.WriteLine("Favourite found: " + nodePath);
-                            this.FontWeight = FontWeights.Bold;
-                        }
-                        else
-                        {
-                            this.FontWeight = FontWeights.Normal;
-                        }
-
-                        if (!isFavourite)
-                        {
-                            this.Height = 0;
-                        }
-                    }
-                    else
-                    {
-                        throw new ApplicationException(
-                            "itemPath does not exist - " + nodePath + ". CD = " + Directory.GetCurrentDirectory());
-                    }
-                }
-                catch (System.Exception exception)
-                {
-                    this.Foreground = System.Windows.Media.Brushes.Red;
-
-                    System.Xml.XmlException xmlException = exception as System.Xml.XmlException;
-                    if (object.ReferenceEquals(null, xmlException))
-                    {
-                        System.Diagnostics.Debug.WriteLine("UNRECOVERABLE Non-XML Exception: " + exception);
-                        // Unexpected exception; re-throw
-                        //throw;
-                    }
-                    else
-                    {
-                        System.Diagnostics.Debug.WriteLine("\nBad XML in " + nodePath + ":\n" + exception);
-                        if (xmlException.Message.Contains("Invalid character in the given encoding."))
-                        {
-                            // Read file trying to auto-detect encoding
-                            // Then change file to utf-16 encoding (unicode) and try again
-                            const bool detectEncodingFromByteOrderMarks = true;
-                            using (var reader = new StreamReader(nodePath, detectEncodingFromByteOrderMarks))
-                            {
-                                try
-                                {
-                                    string xml = reader.ReadToEnd();
-                                }
-                                catch (System.Exception unrecoverableException)
-                                {
-                                    System.Diagnostics.Debug.WriteLine("UNRECOVERABLE because" + unrecoverableException);
-                                    throw;
-                                }
-                            }
-                        }
-                        else if (xmlException.Message.Contains("An error occurred while parsing EntityName."))
-                        {
-                            // This can be cause by ampersands in unescaped text
-                            System.Diagnostics.Debug.WriteLine("Unimplemented XML format fix");
-                        }
-                        else if (xmlException.Message.Contains("Reference to undeclared entity"))
-                        {
-                            // This can be cause by html literals e.g. &egarve;
-                            System.Diagnostics.Debug.WriteLine("Unimplemented XML format fix");
-                        }
-                        else
-                        {
-                            // Can't recover from this, rethrow..
-                            throw;
-                        }
-                    }
-                }
-            }
-
-            public void PopulateArtistTreeNode()
-            {
-                if (this.Items.Count == 1 && string.IsNullOrEmpty(((TreeViewItem)this.Items[0]).Tag as string))
-                {
-                    // only one child with no text - this is the first expansion
-                    this.Items.Clear();
-
-                    foreach (string s in Directory.EnumerateFileSystemEntries(this.Tag.ToString()))
-                    {
-                        AddTreeItem(this, new LyricsTreeViewItem(s));
-                    }
-                }
-            }
-
-            private void folderTreeViewItem_Expanded(object sender, RoutedEventArgs e)
-            {
-                TreeViewItem item = sender as TreeViewItem;
-
-                PopulateArtistTreeNode();
-            }
-
-            private void fileTreeViewItem_MouseDoubleClick(object sender, MouseButtonEventArgs e)
-            {
-                // Set handled to avoid re-selecting old view
-                e.Handled = true;
-
-                TreeViewItem senderItem = sender as TreeViewItem;
-                string filePathSelected = senderItem.Tag as string;
-                if (string.IsNullOrEmpty(filePathSelected))
-                {
-                    throw new ApplicationException("BrowseView: no file selected");
-                }
-                else
-                {
-                    PerformanceView newView = new PerformanceView(
-                        new LyricsPresenter(new XmlLyricsFileParsingStrategy(filePathSelected)));
-                    newView.Show();
-
-                    this.Dispatcher.BeginInvoke((Action)(() => { newView.Activate(); }));
-                }
-            }
         }
 
         public BrowseView()
@@ -227,35 +88,6 @@ namespace LyricUser
             base.OnClosing(e);
         }
 
-        private static void AddTreeItem(ItemsControl itemsControl, TreeViewItem newItem)
-        {
-            itemsControl.Items.Add(newItem);
-            if (FontWeights.Normal != newItem.FontWeight)
-            {
-                // ensure all parent directories indicate favourites
-                TreeViewItem pointer = newItem.Parent as TreeViewItem;
-                while (null != pointer)
-                {
-                    pointer.FontWeight = newItem.FontWeight;
-                    pointer = pointer.Parent as TreeViewItem;
-                }
-            }
-        }
-
-        static private bool GetLyricsIsFavourite(string lyricsFilePath)
-        {
-            if (".xml" != Path.GetExtension(lyricsFilePath))
-            {
-                return false;
-            }
-            else
-            {
-                XmlLyricsFileParsingStrategy parser = new XmlLyricsFileParsingStrategy(lyricsFilePath);
-
-                return parser.GetLyricsIsFavourite();
-            }
-        }
-
         private void RepopulateTree(TreeView tree, string rootPath)
         {
             tree.Items.Clear();
@@ -265,7 +97,7 @@ namespace LyricUser
             }
             else
             {
-                AddTreeItem(tree, new LyricsTreeViewItem(rootPath));
+                tree.Items.Add(new LyricsTreeViewItem(rootPath));
 
                 // Once tree populated, start background thread to find favourites
                 BeginFindAllFavourites();

@@ -78,6 +78,7 @@
       <SubType>Component</SubType>
     </Compile>
     <Compile Include="LyricsPresenter.cs" />
+    <Compile Include="LyricsTreeViewItem.cs" />
     <Compile Include="XmlLyricsFileParsingStrategy.cs" />
     <Page Include="AutoScalingTextBox.xaml">
       <SubType>Designer</SubType>
