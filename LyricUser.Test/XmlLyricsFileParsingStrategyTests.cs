@@ -24,6 +24,14 @@ namespace LyricUser.Test
         }
 
         [TestCase]
+        public void BruteForce()
+        {
+            IDictionary<string, string> results = XmlLyricsFileParsingStrategy.BruteForce(relativePathToTestData);
+            Assert.IsNotNull(results);
+            Assert.AreEqual(results.Count, 6);
+        }
+
+        [TestCase]
         public void SimpleTest()
         {
             XmlLyricsFileParsingStrategy xmlLyricsFileParser = new XmlLyricsFileParsingStrategy(relativePathToTestData);

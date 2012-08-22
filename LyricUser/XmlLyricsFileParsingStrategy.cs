@@ -16,6 +16,29 @@ namespace LyricUser
     /// </remarks>
     public class XmlLyricsFileParsingStrategy
     {
+        private class Schema
+        {
+            public const string DocumentElementName = "document";
+            public const string ArtistElementName = "artist";
+            public const string TitleElementName = "title";
+            public const string CapoElementName = "capo";
+            public const string KeyElementName = "key";
+            public const string FavouriteElementName = "favourite";
+            public const string LyricsElementName = "lyrics";
+
+            public static IList<string> MakeContainerElementList()
+            {
+                IList<string> elements = new List<string>();
+                elements.Add(ArtistElementName);
+                elements.Add(TitleElementName);
+                elements.Add(CapoElementName);
+                elements.Add(KeyElementName);
+                elements.Add(FavouriteElementName);
+                elements.Add(LyricsElementName);
+                return elements;
+            }
+        }
+
         private readonly string xmlFileUrl;
         public string XmlFileUrl
         {
@@ -26,6 +49,54 @@ namespace LyricUser
         }
 
         private IDictionary<string, string> allDataPairs;
+
+        /// <summary>
+        /// Finds the contents of an element (assuming there are no duplicates)
+        /// </summary>
+        /// <returns></returns>
+        private static string FindElementContents(string input, string elementName)
+        {
+            string startTag = string.Concat("<", elementName, ">");
+            string endTag = string.Concat("</", elementName, ">");
+
+            int contentsStart = input.IndexOf(startTag) + startTag.Length;
+
+            if (-1 != input.IndexOf(startTag, contentsStart))
+            {
+                throw new ApplicationException("Duplicate tag - " + startTag);
+            }
+            else
+            {
+                int firstIndexAfterContents = input.IndexOf(endTag, contentsStart);
+                if (-1 == firstIndexAfterContents)
+                {
+                    throw new ApplicationException("No end tag - " + endTag);
+                }
+                else
+                {
+                    int contentsLength = firstIndexAfterContents - contentsStart;
+
+                    return input.Substring(contentsStart, contentsLength);
+                }
+            }
+        }
+
+        public static IDictionary<string, string> BruteForce(string xmlFileUrl)
+        {
+            string fileContents = System.IO.File.ReadAllText(xmlFileUrl);
+
+            IDictionary<string, string> dataPairs = new Dictionary<string, string>(10);
+            foreach (String elementName in Schema.MakeContainerElementList())
+            {
+                string elementContents = FindElementContents(fileContents, elementName);
+                if (!object.ReferenceEquals(null, elementContents))
+                {
+                    dataPairs[elementName] = elementContents;
+                }
+            }
+
+            return dataPairs;
+        }
 
         private class Implementation
         {
@@ -63,7 +134,7 @@ namespace LyricUser
                 using (XmlTextReader xmlTextReader = new XmlTextReader(xmlFileUrl))
                 {
                     // Read to the document element start node
-                    xmlTextReader.ReadToFollowing("document");
+                    xmlTextReader.ReadToFollowing(Schema.DocumentElementName);
 
                     // Look for elements that represent key-value pair data:
                     //  element name is data name, content is value
@@ -161,7 +232,7 @@ namespace LyricUser
         public bool GetLyricsIsFavourite()
         {
             bool result;
-            if (this.TryReadValue<bool>("favourite", out result))
+            if (this.TryReadValue<bool>(Schema.FavouriteElementName, out result))
             {
                 return result;
             }
