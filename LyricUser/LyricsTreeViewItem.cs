@@ -96,59 +96,7 @@ namespace LyricUser
             {
                 this.Foreground = System.Windows.Media.Brushes.Red;
 
-                System.Xml.XmlException xmlException = exception as System.Xml.XmlException;
-                if (object.ReferenceEquals(null, xmlException))
-                {
-                    System.Diagnostics.Debug.WriteLine("UNRECOVERABLE Non-XML Exception: " + exception);
-                    // Unexpected exception; re-throw
-                    //throw;
-                }
-                else
-                {
-                    System.Diagnostics.Debug.WriteLine("\nBad XML in " + nodePath + ":\n" + exception);
-                    if (xmlException.Message.Contains("Invalid character in the given encoding."))
-                    {
-                        // Read file trying to auto-detect encoding
-                        // Then change file to utf-16 encoding (unicode) and try again
-                        const bool detectEncodingFromByteOrderMarks = true;
-                        using (var reader = new StreamReader(nodePath, detectEncodingFromByteOrderMarks))
-                        {
-                            try
-                            {
-                                string xml = reader.ReadToEnd();
-                            }
-                            catch (System.Exception unrecoverableException)
-                            {
-                                System.Diagnostics.Debug.WriteLine("UNRECOVERABLE because" + unrecoverableException);
-                                throw;
-                            }
-                        }
-                    }
-                    else if (xmlException.Message.Contains("An error occurred while parsing EntityName."))
-                    {
-                        // This can be cause by ampersands in unescaped text
-                        System.Diagnostics.Debug.WriteLine("Unimplemented XML format fix");
-                    }
-                    else if (xmlException.Message.Contains("Reference to undeclared entity"))
-                    {
-                        // This can be cause by html literals e.g. &egarve;
-                        System.Diagnostics.Debug.WriteLine("Unimplemented XML format fix");
-                    }
-                    else if (xmlException.Message.Contains("is an invalid character"))
-                    {
-                        // This can be cause by html literals e.g. &egarve;
-                        System.Diagnostics.Debug.WriteLine("Unimplemented XML format fix");
-                    }
-                    else if (xmlException.Message.Contains("Invalid syntax for a decimal numeric entity reference"))
-                    {
-                        System.Diagnostics.Debug.WriteLine("Unimplemented XML format fix");
-                    }
-                    else
-                    {
-                        // Can't recover from this, rethrow..
-                        throw;
-                    }
-                }
+                XmlLyricsFileParsingStrategy.RecoverBadXml(nodePath, exception);
             }
         }
 

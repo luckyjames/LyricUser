@@ -81,10 +81,8 @@ namespace LyricUser
             }
         }
 
-        public static IDictionary<string, string> BruteForce(string xmlFileUrl)
+        public static IDictionary<string, string> BruteForceFromString(string fileContents)
         {
-            string fileContents = System.IO.File.ReadAllText(xmlFileUrl);
-
             IDictionary<string, string> dataPairs = new Dictionary<string, string>(10);
             foreach (String elementName in Schema.MakeContainerElementList())
             {
@@ -96,6 +94,70 @@ namespace LyricUser
             }
 
             return dataPairs;
+        }
+
+        public static IDictionary<string, string> BruteForce(string xmlFileUrl)
+        {
+            return BruteForceFromString(System.IO.File.ReadAllText(xmlFileUrl));
+        }
+
+        public static IDictionary<string, string> RecoverBadXml(string xmlFileUrl, Exception exception)
+        {
+            System.Xml.XmlException xmlException = exception as System.Xml.XmlException;
+            if (object.ReferenceEquals(null, xmlException))
+            {
+                System.Diagnostics.Debug.WriteLine("UNRECOVERABLE Non-XML Exception: " + exception);
+                // Unexpected exception; re-throw
+                throw exception;
+            }
+            else
+            {
+                System.Diagnostics.Debug.WriteLine("\nBad XML in " + xmlFileUrl + ":\n" + exception);
+                if (xmlException.Message.Contains("Invalid character in the given encoding."))
+                {
+                    // Read file trying to auto-detect encoding
+                    // Then change file to utf-16 encoding (unicode) and try again
+                    const bool detectEncodingFromByteOrderMarks = true;
+                    using (var reader = new System.IO.StreamReader(xmlFileUrl, detectEncodingFromByteOrderMarks))
+                    {
+                        try
+                        {
+                            string xml = reader.ReadToEnd();
+
+                            return BruteForceFromString(xml);
+                        }
+                        catch (System.Exception unrecoverableException)
+                        {
+                            System.Diagnostics.Debug.WriteLine("UNRECOVERABLE because" + unrecoverableException);
+                            throw;
+                        }
+                    }
+                }
+                else if (xmlException.Message.Contains("An error occurred while parsing EntityName."))
+                {
+                    // This can be cause by ampersands in unescaped text
+                    return BruteForce(xmlFileUrl);
+                }
+                else if (xmlException.Message.Contains("Reference to undeclared entity"))
+                {
+                    // This can be cause by html literals e.g. &egarve;
+                    return BruteForce(xmlFileUrl);
+                }
+                else if (xmlException.Message.Contains("is an invalid character"))
+                {
+                    // This can be cause by html literals e.g. &egarve;
+                    return BruteForce(xmlFileUrl);
+                }
+                else if (xmlException.Message.Contains("Invalid syntax for a decimal numeric entity reference"))
+                {
+                    return BruteForce(xmlFileUrl);
+                }
+                else
+                {
+                    // Unknown issue, rethrow..
+                    throw exception;
+                }
+            }
         }
 
         private class Implementation

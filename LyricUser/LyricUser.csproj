@@ -73,6 +73,7 @@
     <Compile Include="BrowseView.xaml.cs">
       <DependentUpon>BrowseView.xaml</DependentUpon>
     </Compile>
+    <Compile Include="XmlLyricsFileWritingStrategy.cs" />
     <Compile Include="IPerformableLyrics.cs" />
     <Compile Include="LyricsFileSystem.cs">
       <SubType>Component</SubType>
