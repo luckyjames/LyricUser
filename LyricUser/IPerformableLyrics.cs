@@ -15,7 +15,8 @@ namespace LyricUser
         string Lyrics { get; set; }
 
         ICollection<KeyValuePair<string, string>> Metadata { get; }
-
+        IDictionary<string, string> AllData { get; }
+        
         void SetMetadata(string metadataName, string newValue);
     }
 }

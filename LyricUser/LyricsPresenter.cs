@@ -64,6 +64,20 @@ namespace LyricUser
             get { return fileName; }
         }
 
+        public IDictionary<string, string> AllData
+        {
+            get
+            {
+                Dictionary<string, string> data = new Dictionary<string, string>();
+                data["lyrics"] = this.Lyrics;
+                foreach (KeyValuePair<string, string> entry in metadata)
+                {
+                    data[entry.Key] = entry.Value;
+                }
+                return data;
+            }
+        }
+
         private readonly Collection<KeyValuePair<string, string>> metadata;
         public ICollection<KeyValuePair<string, string>> Metadata
         {

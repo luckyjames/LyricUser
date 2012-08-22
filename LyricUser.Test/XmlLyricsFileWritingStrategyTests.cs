@@ -16,7 +16,9 @@ namespace LyricUser.Test
         {
             var dictionary = new Dictionary<string, string>();
             dictionary["yes"] = "no";
-            Assert.IsNull(XmlLyricsFileWritingStrategy.WriteToString(dictionary));
+            string result = XmlLyricsFileWritingStrategy.WriteToString(dictionary);
+            Assert.IsNotNull(result);
+            Assert.IsTrue(result.Contains("<yes>no</yes>"));
         }
     }
 }

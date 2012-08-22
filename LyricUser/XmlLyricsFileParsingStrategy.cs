@@ -124,6 +124,7 @@ namespace LyricUser
                         {
                             string xml = reader.ReadToEnd();
 
+                            System.Diagnostics.Debug.WriteLine("XML:\n" + xml);
                             return BruteForceFromString(xml);
                         }
                         catch (System.Exception unrecoverableException)

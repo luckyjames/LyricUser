@@ -31,6 +31,15 @@ namespace LyricUser
             return builder.ToString();
         }
 
+        public static void WriteToFile(string outputFileUrl, IDictionary<string, string> data)
+        {
+            using (var stream = new System.IO.FileStream(outputFileUrl, System.IO.FileMode.OpenOrCreate))
+            using (var writer = XmlWriter.Create(stream, MakeSettings()))
+            {
+                Write(writer, data);
+            }
+        }
+
         public static void Write(XmlWriter writer, IDictionary<string, string> data)
         {
             writer.WriteStartElement("document");

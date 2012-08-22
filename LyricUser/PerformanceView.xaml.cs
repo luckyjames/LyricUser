@@ -70,6 +70,16 @@ namespace LyricUser
             this.lyricsBox.Text = LyricsPresenter.Lyrics;
             this.lyricsBox.TextChanged += new TextChangedEventHandler(lyricsBox_TextChanged);
 
+            Button saveButton = new Button();
+            saveButton.Tag = "Save";
+            saveButton.Click += new RoutedEventHandler(saveButton_Click);
+            this.metadataStackPanel.Children.Add(saveButton);
+
+            Button fixButton = new Button();
+            fixButton.Tag = "Fix";
+            fixButton.Click += new RoutedEventHandler(fixButton_Click);
+            this.metadataStackPanel.Children.Add(fixButton);
+
             // For each additional piece of data, push a new TextBlock into the StackPanel
             foreach (KeyValuePair<string, string> entry in LyricsPresenter.Metadata)
             {
@@ -90,6 +100,16 @@ namespace LyricUser
                 newValueTextBlock.TextChanged += new TextChangedEventHandler(newValueTextBlock_TextChanged);
                 this.metadataStackPanel.Children.Add(newValueTextBlock);
             }
+        }
+
+        private void fixButton_Click(object sender, RoutedEventArgs e)
+        {
+            throw new NotImplementedException();
+        }
+
+        private void saveButton_Click(object sender, RoutedEventArgs e)
+        {
+            XmlLyricsFileWritingStrategy.WriteToFile(LyricsPresenter.FileName, LyricsPresenter.AllData);
         }
 
         private void lyricsBox_TextChanged(object sender, TextChangedEventArgs e)
