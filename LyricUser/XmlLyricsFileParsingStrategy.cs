@@ -59,24 +59,33 @@ namespace LyricUser
             string startTag = string.Concat("<", elementName, ">");
             string endTag = string.Concat("</", elementName, ">");
 
-            int contentsStart = input.IndexOf(startTag) + startTag.Length;
+            int startTagIndex = input.IndexOf(startTag);
 
-            if (-1 != input.IndexOf(startTag, contentsStart))
+            if (-1 == startTagIndex)
             {
-                throw new ApplicationException("Duplicate tag - " + startTag);
+                // value not set
+                return null;
             }
             else
             {
-                int firstIndexAfterContents = input.IndexOf(endTag, contentsStart);
-                if (-1 == firstIndexAfterContents)
+                int contentsStart = startTagIndex + startTag.Length;
+                if (-1 != input.IndexOf(startTag, contentsStart))
                 {
-                    throw new ApplicationException("No end tag - " + endTag);
+                    throw new ApplicationException("Duplicate tag - " + startTag);
                 }
                 else
                 {
-                    int contentsLength = firstIndexAfterContents - contentsStart;
+                    int firstIndexAfterContents = input.IndexOf(endTag, contentsStart);
+                    if (-1 == firstIndexAfterContents)
+                    {
+                        throw new ApplicationException("No end tag - " + endTag);
+                    }
+                    else
+                    {
+                        int contentsLength = firstIndexAfterContents - contentsStart;
 
-                    return input.Substring(contentsStart, contentsLength);
+                        return input.Substring(contentsStart, contentsLength);
+                    }
                 }
             }
         }
