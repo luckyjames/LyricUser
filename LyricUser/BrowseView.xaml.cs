@@ -5,6 +5,8 @@ using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
 using System.Threading;
+using System.Reflection;
+using System.Diagnostics;
 
 namespace LyricUser
 {
@@ -44,6 +46,22 @@ namespace LyricUser
             ThreadPool.QueueUserWorkItem(new WaitCallback(FindAllFavourites), this);
         }
 
+        private static string GetApplicationVersionString()
+        {
+            // Place in local code
+            Assembly ass = Assembly.GetExecutingAssembly();
+
+            if (null == ass)
+            {
+                throw new ApplicationException("Couldn't get executing assembly!");
+            }
+            else
+            {
+                FileVersionInfo fileVersionInfo = FileVersionInfo.GetVersionInfo(ass.Location);
+                return String.Concat(fileVersionInfo.ProductName, " ", fileVersionInfo.FileVersion);
+            }
+        }
+
         public BrowseView()
         {
             InitializeComponent();
@@ -51,6 +69,8 @@ namespace LyricUser
             // Initialise root path with the last user folder after controls are constructed but
             //  before it is set by the application using this form
             RootPath = LyricUser.Properties.Settings.Default.LastOpenedLyricsFolder;
+
+            this.Title = GetApplicationVersionString();
         }
 
         private string rootPath;
