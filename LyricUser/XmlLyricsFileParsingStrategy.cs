@@ -117,7 +117,7 @@ namespace LyricUser
             {
                 System.Diagnostics.Debug.WriteLine("UNRECOVERABLE Non-XML Exception: " + exception);
                 // Unexpected exception; re-throw
-                throw exception;
+                throw new ApplicationException(string.Format("Failed to parse {0}", xmlFileUrl), exception);
             }
             else
             {

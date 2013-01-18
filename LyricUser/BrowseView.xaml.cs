@@ -7,6 +7,7 @@ using System.Windows.Input;
 using System.Threading;
 using System.Reflection;
 using System.Diagnostics;
+using System.Collections.Generic;
 
 namespace LyricUser
 {
@@ -108,6 +109,31 @@ namespace LyricUser
             base.OnClosing(e);
         }
 
+        private static void TidyLyricsInTree(string rootFolderPath)
+        {
+            DirectoryInfo dirInfo = new DirectoryInfo(rootFolderPath);
+            FileInfo[] allFiles = dirInfo.GetFiles("*.xml", SearchOption.AllDirectories);
+            foreach (FileInfo fileInfo in allFiles)
+            {
+                XmlLyricsFileParsingStrategy reader = new XmlLyricsFileParsingStrategy(fileInfo.FullName);
+                try
+                {
+                    reader.ReadAll();
+                }
+                catch
+                {
+                    // Something went wrong; only then do I try and correct the file
+                    System.Diagnostics.Debug.Print("Correcting {0}..", fileInfo.Name);
+
+                    // Read using brute force
+                    IDictionary<string, string> data = XmlLyricsFileParsingStrategy.BruteForce(fileInfo.FullName);
+                    // Write again using normal XML writing to create file
+                    XmlLyricsFileWritingStrategy.WriteToFile(fileInfo.FullName + ".correct.xml", data);
+                }
+            }
+        }
+
+
         private void RepopulateTree(TreeView tree, string rootPath)
         {
             tree.Items.Clear();
@@ -117,6 +143,12 @@ namespace LyricUser
             }
             else
             {
+                MessageBoxResult answer = MessageBox.Show("Tidy XML?", "Caption", MessageBoxButton.YesNo);
+                if (MessageBoxResult.Yes == answer)
+                {
+                    TidyLyricsInTree(rootPath);
+                }
+
                 tree.Items.Add(new LyricsTreeViewItem(rootPath));
 
                 // Once tree populated, start background thread to find favourites
