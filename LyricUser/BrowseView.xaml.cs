@@ -109,30 +109,55 @@ namespace LyricUser
             base.OnClosing(e);
         }
 
+        private static void TidyFile(string filePath)
+        {
+            XmlLyricsFileParsingStrategy reader = new XmlLyricsFileParsingStrategy(filePath);
+            try
+            {
+                reader.ReadAll();
+            }
+            catch
+            {
+                // Something went wrong; only then do I try and correct the file
+                System.Diagnostics.Debug.Print("Correcting {0}..", filePath);
+
+                // Read using brute force
+                IDictionary<string, string> data = XmlLyricsFileParsingStrategy.BruteForce(filePath);
+
+                // Write again using normal XML writing to create file
+                string newPath = filePath + ".correct.xml";
+                XmlLyricsFileWritingStrategy.WriteToFile(newPath, data);
+
+                // Check subsequent read now works
+                XmlLyricsFileParsingStrategy resultantReader = new XmlLyricsFileParsingStrategy(newPath);
+                try
+                {
+                    resultantReader.ReadAll();
+                }
+                catch
+                {
+                    // Delete the new file and bomb out
+                    File.Delete(newPath);
+
+                    throw;
+                }
+
+                // ReadAll will throw if the problem is still not fixed
+                // so now we know it's fixed, swap the old file with the new one..
+                File.Delete(filePath);
+                File.Move(newPath, filePath);
+            }
+        }
+        
         private static void TidyLyricsInTree(string rootFolderPath)
         {
             DirectoryInfo dirInfo = new DirectoryInfo(rootFolderPath);
             FileInfo[] allFiles = dirInfo.GetFiles("*.xml", SearchOption.AllDirectories);
             foreach (FileInfo fileInfo in allFiles)
             {
-                XmlLyricsFileParsingStrategy reader = new XmlLyricsFileParsingStrategy(fileInfo.FullName);
-                try
-                {
-                    reader.ReadAll();
-                }
-                catch
-                {
-                    // Something went wrong; only then do I try and correct the file
-                    System.Diagnostics.Debug.Print("Correcting {0}..", fileInfo.Name);
-
-                    // Read using brute force
-                    IDictionary<string, string> data = XmlLyricsFileParsingStrategy.BruteForce(fileInfo.FullName);
-                    // Write again using normal XML writing to create file
-                    XmlLyricsFileWritingStrategy.WriteToFile(fileInfo.FullName + ".correct.xml", data);
-                }
+                TidyFile(fileInfo.FullName);
             }
         }
-
 
         private void RepopulateTree(TreeView tree, string rootPath)
         {

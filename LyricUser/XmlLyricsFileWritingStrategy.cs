@@ -2,6 +2,7 @@
 using System;
 using System.Collections.Generic;
 using System.Xml;
+using System.Text;
 
 namespace LyricUser
 {
@@ -16,6 +17,8 @@ namespace LyricUser
             XmlWriterSettings settings = new XmlWriterSettings();
             settings.Indent = true;
             settings.CheckCharacters = true;
+            // use little endian unicode to support useful characters
+            settings.Encoding = System.Text.Encoding.Unicode;
             return settings;
         }
 
