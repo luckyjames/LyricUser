@@ -8,6 +8,7 @@ using System.Threading;
 using System.Reflection;
 using System.Diagnostics;
 using System.Collections.Generic;
+using System.Deployment.Application;
 
 namespace LyricUser
 {
@@ -47,7 +48,23 @@ namespace LyricUser
             ThreadPool.QueueUserWorkItem(new WaitCallback(FindAllFavourites), this);
         }
 
-        private static string GetApplicationVersionString()
+        private static string GetProductName()
+        {
+            // Place in local code
+            Assembly ass = Assembly.GetExecutingAssembly();
+
+            if (null == ass)
+            {
+                throw new ApplicationException("Couldn't get executing assembly!");
+            }
+            else
+            {
+                FileVersionInfo fileVersionInfo = FileVersionInfo.GetVersionInfo(ass.Location);
+                return fileVersionInfo.ProductName;
+            }
+        }
+
+        private static string GetAssemblyVersionString()
         {
             // Place in local code
             Assembly ass = Assembly.GetExecutingAssembly();
@@ -60,6 +77,18 @@ namespace LyricUser
             {
                 FileVersionInfo fileVersionInfo = FileVersionInfo.GetVersionInfo(ass.Location);
                 return String.Concat(fileVersionInfo.ProductName, " ", fileVersionInfo.FileVersion);
+            }
+        }
+
+        private static string GetApplicationVersionString()
+        {
+            if (ApplicationDeployment.IsNetworkDeployed)
+            {
+                return String.Concat(GetProductName(), " ", ApplicationDeployment.CurrentDeployment.CurrentVersion.ToString());
+            }
+            else
+            {
+                return "Debug Version";
             }
         }
 
