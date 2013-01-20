@@ -61,8 +61,7 @@ namespace LyricUser
             }
             else
             {
-                FileVersionInfo fileVersionInfo = FileVersionInfo.GetVersionInfo(ass.Location);
-                return fileVersionInfo.ProductName;
+                return FileVersionInfo.GetVersionInfo(ass.Location).ProductName;
             }
         }
 
@@ -77,8 +76,7 @@ namespace LyricUser
             }
             else
             {
-                FileVersionInfo fileVersionInfo = FileVersionInfo.GetVersionInfo(ass.Location);
-                return String.Concat(fileVersionInfo.ProductName, " ", fileVersionInfo.FileVersion);
+                return FileVersionInfo.GetVersionInfo(ass.Location).FileVersion;
             }
         }
 
@@ -86,7 +84,7 @@ namespace LyricUser
         {
             if (ApplicationDeployment.IsNetworkDeployed)
             {
-                return String.Concat(GetProductName(), " ", ApplicationDeployment.CurrentDeployment.CurrentVersion.ToString());
+                return ApplicationDeployment.CurrentDeployment.CurrentVersion.ToString();
             }
             else
             {
@@ -102,7 +100,7 @@ namespace LyricUser
             //  before it is set by the application using this form
             RootPath = LyricUser.Properties.Settings.Default.LastOpenedLyricsFolder;
 
-            this.Title = GetApplicationVersionString();
+            this.Title = String.Concat(GetProductName(), " ", GetApplicationVersionString());
         }
 
         private string rootPath;
@@ -120,16 +118,16 @@ namespace LyricUser
             }
         }
 
-        private bool favouritesVisible;
-        public bool FavouritesVisible
+        private bool onlyFavouritesVisible = false;
+        private bool OnlyFavouritesVisible
         {
             get
             {
-                return favouritesVisible;
+                return onlyFavouritesVisible;
             }
             set
             {
-                favouritesVisible = value;
+                onlyFavouritesVisible = value;
             }
         }
 
@@ -138,56 +136,6 @@ namespace LyricUser
             LyricUser.Properties.Settings.Default.LastOpenedLyricsFolder = RootPath;
             LyricUser.Properties.Settings.Default.Save();
             base.OnClosing(e);
-        }
-
-        private static void TidyFile(string filePath)
-        {
-            XmlLyricsFileParsingStrategy reader = new XmlLyricsFileParsingStrategy(filePath);
-            try
-            {
-                reader.ReadAll();
-            }
-            catch
-            {
-                // Something went wrong; only then do I try and correct the file
-                System.Diagnostics.Debug.Print("Correcting {0}..", filePath);
-
-                // Read using brute force
-                IDictionary<string, string> data = XmlLyricsFileParsingStrategy.BruteForce(filePath);
-
-                // Write again using normal XML writing to create file
-                string newPath = filePath + ".correct.xml";
-                XmlLyricsFileWritingStrategy.WriteToFile(newPath, data);
-
-                // Check subsequent read now works
-                XmlLyricsFileParsingStrategy resultantReader = new XmlLyricsFileParsingStrategy(newPath);
-                try
-                {
-                    resultantReader.ReadAll();
-                }
-                catch
-                {
-                    // Delete the new file and bomb out
-                    File.Delete(newPath);
-
-                    throw;
-                }
-
-                // ReadAll will throw if the problem is still not fixed
-                // so now we know it's fixed, swap the old file with the new one..
-                File.Delete(filePath);
-                File.Move(newPath, filePath);
-            }
-        }
-        
-        private static void TidyLyricsInTree(string rootFolderPath)
-        {
-            DirectoryInfo dirInfo = new DirectoryInfo(rootFolderPath);
-            FileInfo[] allFiles = dirInfo.GetFiles("*.xml", SearchOption.AllDirectories);
-            foreach (FileInfo fileInfo in allFiles)
-            {
-                TidyFile(fileInfo.FullName);
-            }
         }
 
         private void RepopulateTree(TreeView tree, string rootPath)
@@ -199,12 +147,6 @@ namespace LyricUser
             }
             else
             {
-                MessageBoxResult answer = MessageBox.Show("Tidy XML?", "Caption", MessageBoxButton.YesNo);
-                if (MessageBoxResult.Yes == answer)
-                {
-                    TidyLyricsInTree(rootPath);
-                }
-
                 tree.Items.Add(new LyricsTreeViewItem(rootPath));
 
                 // Once tree populated, start background thread to find favourites
@@ -237,12 +179,12 @@ namespace LyricUser
 
         private void favouritesCheckBox_Checked(object sender, RoutedEventArgs e)
         {
-            FavouritesVisible = true;
+            OnlyFavouritesVisible = true;
         }
 
         private void favouritesCheckBox_Unchecked(object sender, RoutedEventArgs e)
         {
-            FavouritesVisible = false;
+            OnlyFavouritesVisible = false;
         }
     }
 }
