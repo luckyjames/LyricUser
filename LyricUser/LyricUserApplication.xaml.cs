@@ -32,26 +32,34 @@ namespace LyricUser
             object sender,
             System.Windows.Threading.DispatcherUnhandledExceptionEventArgs e)
         {
-            string traceFileName = "GeneratorTestbedError.txt";
-            string allUsersAppDataFolder = Environment.GetFolderPath(Environment.SpecialFolder.CommonApplicationData);
-            if (string.IsNullOrEmpty(allUsersAppDataFolder))
+            try
             {
-                allUsersAppDataFolder = Environment.GetFolderPath(Environment.SpecialFolder.Desktop);
-            }
-            string theErrorPath = System.IO.Path.Combine(allUsersAppDataFolder, traceFileName);
-            using (System.IO.TextWriter theTextWriter = new System.IO.StreamWriter(theErrorPath, true))
-            {
-                DateTime theNow = DateTime.Now;
-                theTextWriter.WriteLine("The error time: " + theNow.ToShortDateString() + " " + theNow.ToShortTimeString());
-                Exception innerExceptionReference = e.Exception;
-                while (innerExceptionReference != null)
+
+                string traceFileName = "GeneratorTestbedError.txt";
+                string allUsersAppDataFolder = Environment.GetFolderPath(Environment.SpecialFolder.CommonApplicationData);
+                if (string.IsNullOrEmpty(allUsersAppDataFolder))
                 {
-                    theTextWriter.WriteLine("Exception: " + e.Exception.ToString());
-                    innerExceptionReference = e.Exception.InnerException;
+                    allUsersAppDataFolder = Environment.GetFolderPath(Environment.SpecialFolder.Desktop);
                 }
+                string theErrorPath = System.IO.Path.Combine(allUsersAppDataFolder, traceFileName);
+                using (System.IO.TextWriter theTextWriter = new System.IO.StreamWriter(theErrorPath, true))
+                {
+                    DateTime theNow = DateTime.Now;
+                    theTextWriter.WriteLine("The error time: " + theNow.ToShortDateString() + " " + theNow.ToShortTimeString());
+                    Exception innerExceptionReference = e.Exception;
+                    while (innerExceptionReference != null)
+                    {
+                        theTextWriter.WriteLine("Exception: " + e.Exception.ToString());
+                        innerExceptionReference = e.Exception.InnerException;
+                    }
+                }
+                MessageBox.Show(string.Format("The program crashed. A stack trace can be found at:\n{0}\n\nException:\n{1}\n\nClosing the application..", theErrorPath, e.Exception.ToString()));
             }
-            MessageBox.Show(string.Format("The program crashed. A stack trace can be found at:\n{0}\n\nException:\n{1}\n\nClosing the application..", theErrorPath, e.Exception.ToString()));
-            e.Handled = true;
+            catch (Exception exception)
+            {
+                MessageBox.Show(string.Format("The program crashed. A stack trace couldn't be written because of an exception in LyricsViewerDispatcherUnhandledException :\n{0}\n\nClosing the application..", exception.ToString()));
+            }
+
             Application.Current.Shutdown();
         }
     }
