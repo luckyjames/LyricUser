@@ -71,12 +71,12 @@ namespace LyricUser
             this.lyricsBox.TextChanged += new TextChangedEventHandler(lyricsBox_TextChanged);
 
             Button saveButton = new Button();
-            saveButton.Tag = "Save";
+            saveButton.Content = "Save";
             saveButton.Click += new RoutedEventHandler(saveButton_Click);
             this.metadataStackPanel.Children.Add(saveButton);
 
             Button fixButton = new Button();
-            fixButton.Tag = "Fix";
+            fixButton.Content = "Fix";
             fixButton.Click += new RoutedEventHandler(fixButton_Click);
             this.metadataStackPanel.Children.Add(fixButton);
 
@@ -169,18 +169,18 @@ namespace LyricUser
         static bool PromptToSave(string fileName)
         {
             System.Windows.Forms.DialogResult result = System.Windows.Forms.MessageBox.Show(
-                "Save?", fileName, System.Windows.Forms.MessageBoxButtons.OKCancel);
+                "Save?", fileName, System.Windows.Forms.MessageBoxButtons.YesNo);
             switch (result)
             {
-                case System.Windows.Forms.DialogResult.OK:
+                case System.Windows.Forms.DialogResult.Yes:
                     return true;
                 case System.Windows.Forms.DialogResult.Cancel:
+                case System.Windows.Forms.DialogResult.No:
                     // Expected navigation cancel
                     return false;
-                case System.Windows.Forms.DialogResult.Yes:
+                case System.Windows.Forms.DialogResult.OK:
                 case System.Windows.Forms.DialogResult.Abort:
                 case System.Windows.Forms.DialogResult.Ignore:
-                case System.Windows.Forms.DialogResult.No:
                 case System.Windows.Forms.DialogResult.None:
                 case System.Windows.Forms.DialogResult.Retry:
                 default:
