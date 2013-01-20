@@ -9,14 +9,13 @@ namespace LyricUser
     /// <summary>
     /// Stipulates how an XML lyrics file is saved
     /// </summary>
-
     public class XmlLyricsFileWritingStrategy
     {
         private static XmlWriterSettings MakeSettings()
         {
             XmlWriterSettings settings = new XmlWriterSettings();
             settings.Indent = true;
-            settings.CheckCharacters = true;
+            settings.CheckCharacters = false;
             // use little endian unicode to support useful characters
             settings.Encoding = System.Text.Encoding.Unicode;
             return settings;
@@ -36,10 +35,17 @@ namespace LyricUser
 
         public static void WriteToFile(string outputFileUrl, IDictionary<string, string> data)
         {
-            using (var stream = new System.IO.FileStream(outputFileUrl, System.IO.FileMode.OpenOrCreate))
-            using (var writer = XmlWriter.Create(stream, MakeSettings()))
+            try
             {
-                Write(writer, data);
+                using (var stream = new System.IO.FileStream(outputFileUrl, System.IO.FileMode.OpenOrCreate))
+                using (var writer = XmlWriter.Create(stream, MakeSettings()))
+                {
+                    Write(writer, data);
+                }
+            }
+            catch (Exception exception)
+            {
+                throw new ApplicationException(string.Concat("Couldn't write file ", outputFileUrl), exception);
             }
         }
 
@@ -48,7 +54,16 @@ namespace LyricUser
             writer.WriteStartElement("document");
             foreach (string elementName in data.Keys)
             {
-                writer.WriteElementString(elementName, data[elementName]);
+                try
+                {
+                    writer.WriteElementString(elementName, data[elementName]);
+                }
+                catch (Exception exception)
+                {
+                    throw new ApplicationException(
+                        string.Format("couldn't write {0} - {1}", elementName, data[elementName]),
+                        exception);
+                }
             }
             writer.WriteEndElement();
         }
