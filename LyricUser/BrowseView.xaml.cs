@@ -34,8 +34,10 @@ namespace LyricUser
                 LyricsTreeViewItem artistItem = descendent as LyricsTreeViewItem;
                 if (!object.ReferenceEquals(null, artistItem))
                 {
+                    // Use background priority to try and give priority to user interactions
                     System.Windows.Threading.DispatcherOperation artistNodeToken = view.Dispatcher.BeginInvoke(
-                        (Action)(() => { artistItem.PopulateFolderNode(); }));
+                        (Action)(() => { artistItem.PopulateFolderNode(); }),
+                        System.Windows.Threading.DispatcherPriority.Background);
                     // Wait for the artist node population to finish before queueing the next one, otherwise
                     //  the GUI becomes very unresponsive
                     artistNodeToken.Wait();
