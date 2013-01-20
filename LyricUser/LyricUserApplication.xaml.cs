@@ -46,11 +46,11 @@ namespace LyricUser
                 {
                     DateTime theNow = DateTime.Now;
                     theTextWriter.WriteLine("The error time: " + theNow.ToShortDateString() + " " + theNow.ToShortTimeString());
-                    Exception innerExceptionReference = e.Exception;
-                    while (innerExceptionReference != null)
+                    Exception currentException = e.Exception;
+                    while (currentException != null)
                     {
-                        theTextWriter.WriteLine("Exception: " + e.Exception.ToString());
-                        innerExceptionReference = e.Exception.InnerException;
+                        theTextWriter.WriteLine("Exception: " + currentException.ToString());
+                        currentException = currentException.InnerException;
                     }
                 }
                 MessageBox.Show(string.Format("The program crashed. A stack trace can be found at:\n{0}\n\nException:\n{1}\n\nClosing the application..", theErrorPath, e.Exception.ToString()));
