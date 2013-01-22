@@ -13,6 +13,7 @@
             HorizontalAlignment="Stretch"
             VerticalAlignment="Stretch"
             TextAlignment="Center"
-            BorderThickness="0" />
+            BorderThickness="0"
+            AcceptsReturn="True" />
     </Viewbox>
 </UserControl>
