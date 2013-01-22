@@ -16,16 +16,7 @@ namespace LyricUser
         {
             InitializeComponent();
 
-            if (null == lyricsPresenter)
-            {
-                throw new ApplicationException("Performance view requires lyrics!");
-            }
-            else
-            {
-                this.DataContext = lyricsPresenter;
-                UpdateTitle();
-                PopulateWindow();
-            }
+            Load(lyricsPresenter);
         }
         
         private void UpdateTitle()
@@ -65,19 +56,27 @@ namespace LyricUser
             }
         }
 
-        private void PopulateWindow()
+        private void RepopulateWindow()
         {
             this.lyricsBox.Text = LyricsPresenter.Lyrics;
             this.lyricsBox.TextChanged += new TextChangedEventHandler(lyricsBox_TextChanged);
 
+            // Clear the existing children so we can save reload as many times as required
+            this.metadataStackPanel.Children.Clear();
+
+            // Now populate with automatically generated user interface
             Button saveButton = new Button();
             saveButton.Content = "Save";
             saveButton.Click += new RoutedEventHandler(saveButton_Click);
+            saveButton.Padding = new Thickness(0, 10, 0, 0);
             this.metadataStackPanel.Children.Add(saveButton);
 
+            // Fix functionality is currently disabled as there is nothing to do.
             Button fixButton = new Button();
             fixButton.Content = "Fix";
             fixButton.Click += new RoutedEventHandler(fixButton_Click);
+            fixButton.IsEnabled = false;
+            fixButton.Padding = new Thickness(0, 10, 0, 0);
             this.metadataStackPanel.Children.Add(fixButton);
 
             // For each additional piece of data, push a new TextBlock into the StackPanel
@@ -104,12 +103,47 @@ namespace LyricUser
 
         private void fixButton_Click(object sender, RoutedEventArgs e)
         {
-            throw new NotImplementedException();
+            MessageBox.Show("No fix policy; no doing anything");
         }
 
-        private void saveButton_Click(object sender, RoutedEventArgs e)
+        /// <summary>
+        /// Simply save the current data file to its current location
+        /// Doesn't reload so this can be called when saving
+        /// </summary>
+        private void Save()
         {
             XmlLyricsFileWritingStrategy.WriteToFile(LyricsPresenter.FileName, LyricsPresenter.AllData);
+        }
+
+        /// <summary>
+        /// Loads a given lyrics presnter into the view
+        /// </summary>
+        /// <param name="lyricsPresenter"></param>
+        private void Load(IPerformableLyrics lyricsPresenter)
+        {
+            if (null == lyricsPresenter)
+            {
+                throw new ApplicationException("Performance view requires lyrics!");
+            }
+            else
+            {
+                this.DataContext = lyricsPresenter;
+                UpdateTitle();
+                RepopulateWindow();
+            }
+        }
+
+        /// <summary>
+        /// Saves the current data, then reloads the file to continue in a consistent manner
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        private void saveButton_Click(object sender, RoutedEventArgs e)
+        {
+            Save();
+
+            // Reload everything from disc
+            Load(new LyricsPresenter(new XmlLyricsFileParsingStrategy(LyricsPresenter.FileName)));
         }
 
         private void lyricsBox_TextChanged(object sender, TextChangedEventArgs e)
@@ -192,7 +226,7 @@ namespace LyricUser
         {
             if (LyricsPresenter.IsModified && PromptToSave(LyricsPresenter.FileName))
             {
-                throw new NotImplementedException("SAVING NOT IMPLEMENTED");
+                Save();
             }
             base.OnClosing(e);
         }
