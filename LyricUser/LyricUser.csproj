@@ -76,7 +76,7 @@
     <Compile Include="StaticLyricsTidier.cs" />
     <Compile Include="XmlLyricsFileWritingStrategy.cs" />
     <Compile Include="IPerformableLyrics.cs" />
-    <Compile Include="LyricsFileSystem.cs">
+    <Compile Include="LyricsFileSystemModel.cs">
       <SubType>Component</SubType>
     </Compile>
     <Compile Include="LyricsPresenter.cs" />

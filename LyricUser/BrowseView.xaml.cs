@@ -17,7 +17,7 @@ namespace LyricUser
     /// </summary>
     public partial class BrowseView : Window
     {
-        private static void FindAllFavourites(Object stateInfo)
+        private static void FilterVisibleNodes(Object stateInfo)
         {
             BrowseView view = ((BrowseView)stateInfo);
 
@@ -45,9 +45,9 @@ namespace LyricUser
             }
         }
 
-        private void BeginFindAllFavourites()
+        private void BeginFilter()
         {
-            ThreadPool.QueueUserWorkItem(new WaitCallback(FindAllFavourites), this);
+            ThreadPool.QueueUserWorkItem(new WaitCallback(FilterVisibleNodes), this);
         }
 
         private static string GetProductName()
@@ -114,7 +114,7 @@ namespace LyricUser
             {
                 rootPath = value;
 
-                RepopulateTree(this.fileTree, this.rootPath);
+                ClearAndInitialiseTree(this.fileTree, this.rootPath);
             }
         }
 
@@ -138,7 +138,12 @@ namespace LyricUser
             base.OnClosing(e);
         }
 
-        private void RepopulateTree(TreeView tree, string rootPath)
+        /// <summary>
+        /// Called to reset the tree to its initial state, e.g. when a new root folder is selected
+        /// </summary>
+        /// <param name="tree"></param>
+        /// <param name="rootPath"></param>
+        private void ClearAndInitialiseTree(TreeView tree, string rootPath)
         {
             tree.Items.Clear();
             if (!Directory.Exists(rootPath))
@@ -149,8 +154,11 @@ namespace LyricUser
             {
                 tree.Items.Add(new LyricsTreeViewItem(rootPath));
 
-                // Once tree populated, start background thread to find favourites
-                BeginFindAllFavourites();
+                if (this.favouritesCheckBox.IsChecked.HasValue && this.favouritesCheckBox.IsChecked.Value)
+                {
+	                // Once tree populated, start background thread to find favourites
+	                BeginFilter();
+                }
             }
         }
 
