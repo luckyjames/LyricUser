@@ -1,0 +1,18 @@
+<?xml version="1.0"?>
+<Wix xmlns="http://schemas.microsoft.com/wix/2006/wi">
+    <Product Id="*" Name="LyricsUser" Language="1033" Version="1.0.0.0" UpgradeCode="242093B1-450D-4AC5-9D73-3C91C00B0FB5" Manufacturer="James">
+        <Package Description="#Description" Comments="Installer for LyricsUser" InstallerVersion="200" Compressed="yes" />
+        <!--
+            Source media for the installation. 
+             Specifies a single cab file to be embedded in the installer's .msi. 
+        -->
+        <Media Id="1" Cabinet="contents.cab" EmbedCab="yes" CompressionLevel="high" />
+        <!-- Installation directory and files are defined in Files.wxs -->
+        <Directory Id="TARGETDIR" Name="SourceDir" />
+        <Feature Id="Complete" Title="LyricUser" Description="LyricUser Installer" Level="1">
+            <ComponentRef Id="LyricsUserExecutable" />
+        </Feature>
+        <Property Id="WIXUI_INSTALLDIR">INSTALLDIR</Property>
+        <UIRef Id="WixUI_InstallDir" />
+    </Product>
+</Wix>
