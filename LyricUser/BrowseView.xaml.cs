@@ -309,11 +309,13 @@ namespace LyricUser
             {
                 if (currentItem.NodePresenter.isFolder)
                 {
+                    // Remove current folder node
                     // Update file system
                     // Update lyrics file contents
                 }
                 else
                 {
+                    // Remove current file node
                     // Update file system
                     // Update lyrics file contents
                 }
