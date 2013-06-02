@@ -1,21 +1,5 @@
 ﻿<?xml version="1.0"?>
 <Wix xmlns="http://schemas.microsoft.com/wix/2006/wi">
     <Fragment>
-        <DirectoryRef Id="TARGETDIR">
-            <Directory Id="ProgramFilesFolder" Name="PFiles">
-                <Directory Id="INSTALLDIR" Name="LyricsUser">
-                    <Component Id="LyricsUserExecutable" Guid="3BF7CB7B-F55F-4F4E-9B35-FD4FE7A09A93" DiskId="1">
-                        <File Id="LicenseFile"
-                              Name="license.rtf"
-                              Source="license.rtf"/>
-                        <File Id="ExecutableFile"
-                              Name="LyricUser.exe"
-                              DiskId="1"
-                              Vital="yes"
-                              Source="..\LyricUser\bin\Release\LyricUser.exe" />
-                    </Component>
-                </Directory>
-            </Directory>
-        </DirectoryRef>
     </Fragment>
 </Wix>

@@ -1,18 +1,55 @@
 <?xml version="1.0"?>
 <Wix xmlns="http://schemas.microsoft.com/wix/2006/wi">
     <Product Id="*" Name="LyricsUser" Language="1033" Version="1.0.0.0" UpgradeCode="242093B1-450D-4AC5-9D73-3C91C00B0FB5" Manufacturer="James">
-        <Package Description="#Description" Comments="Installer for LyricsUser" InstallerVersion="200" Compressed="yes" />
-        <!--
-            Source media for the installation. 
-             Specifies a single cab file to be embedded in the installer's .msi. 
-        -->
+        <Package
+            Description="#Description"
+            Comments="Installer for LyricsUser"
+            InstallerVersion="200"
+            Compressed="yes" />
         <Media Id="1" Cabinet="contents.cab" EmbedCab="yes" CompressionLevel="high" />
-        <!-- Installation directory and files are defined in Files.wxs -->
-        <Directory Id="TARGETDIR" Name="SourceDir" />
+
+        <Directory Id="TARGETDIR" Name="SourceDir">
+            <Directory Id="ProgramFilesFolder">
+                <Directory Id="APPLICATIONROOTDIRECTORY" Name="LyricsUser"/>
+            </Directory>
+            <Directory Id="ProgramMenuFolder">
+                <Directory Id="ApplicationProgramsFolder" Name="LyricsUser"/>
+            </Directory>
+        </Directory>
+        
+        <DirectoryRef Id="ProgramFilesFolder">
+            <Directory Id="INSTALLDIR" Name="LyricsUser">
+                <Component Id="LyricsUserExecutable" Guid="3BF7CB7B-F55F-4F4E-9B35-FD4FE7A09A93" DiskId="1">
+                    <File Id="ExecutableFile"
+                          Name="LyricUser.exe"
+                          DiskId="1"
+                          Vital="yes"
+                          Source="..\LyricUser\bin\Release\LyricUser.exe" />
+                </Component>
+            </Directory>
+        </DirectoryRef>
+
+        <DirectoryRef Id="ApplicationProgramsFolder">
+            <Component Id="ApplicationShortcut" Guid="3BF7CB7B-F55F-4F4E-9B35-FD4FE7A09A94">
+                <Shortcut Id="ApplicationStartMenuShortcut" 
+                    Name="Start LyricsUser" 
+                    Description="Starts the LyricsUser application"
+                    Target="[APPLICATIONROOTDIRECTORY]LyricUser.exe"
+                    WorkingDirectory="APPLICATIONROOTDIRECTORY"/>
+                <RemoveFolder Id="ApplicationProgramsFolder" On="uninstall"/>
+                <RegistryValue Root="HKCU" Key="Software\Microsoft\MyApplicationName"
+                               Name="installed" Type="integer" Value="1" KeyPath="yes"/>
+           </Component>
+        </DirectoryRef>
+
         <Feature Id="Complete" Title="LyricUser" Description="LyricUser Installer" Level="1">
             <ComponentRef Id="LyricsUserExecutable" />
+            <ComponentRef Id="ApplicationShortcut" />
         </Feature>
+
         <Property Id="WIXUI_INSTALLDIR">INSTALLDIR</Property>
+
         <UIRef Id="WixUI_InstallDir" />
     </Product>
 </Wix>
+
