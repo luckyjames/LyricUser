@@ -56,6 +56,26 @@ namespace LyricUser
             }
         }
 
+        private void AddAttributeEditor(string elementName, string currentValue)
+        {
+            TextBlock newKeyTextBlock = new TextBlock();
+            // add some padding above each metadata item
+            newKeyTextBlock.Padding = new Thickness(0, 10, 0, 0);
+            newKeyTextBlock.Text = elementName;
+            newKeyTextBlock.FontSize = 14;
+            newKeyTextBlock.Foreground = System.Windows.Media.Brushes.Black;
+            this.metadataStackPanel.Children.Add(newKeyTextBlock);
+
+            TextBox newValueTextBlock = new TextBox();
+            newValueTextBlock.Tag = elementName;
+            newValueTextBlock.Text = currentValue;
+            newValueTextBlock.FontSize = 14;
+            newValueTextBlock.Background = System.Windows.Media.Brushes.White;
+            newValueTextBlock.Foreground = System.Windows.Media.Brushes.Black;
+            newValueTextBlock.TextChanged += new TextChangedEventHandler(newValueTextBlock_TextChanged);
+            this.metadataStackPanel.Children.Add(newValueTextBlock);
+        }
+
         private void RepopulateWindow()
         {
             this.lyricsBox.Text = LyricsPresenter.Lyrics;
@@ -79,31 +99,28 @@ namespace LyricUser
             fixButton.Padding = new Thickness(0, 10, 0, 0);
             this.metadataStackPanel.Children.Add(fixButton);
 
+            SortedSet<string> attributesAdded = new SortedSet<string>();
+
             // For each additional piece of data, push a new TextBlock into the StackPanel
             foreach (KeyValuePair<string, string> entry in LyricsPresenter.Metadata)
             {
-                TextBlock newKeyTextBlock = new TextBlock();
-                // add some padding above each metadata item
-                newKeyTextBlock.Padding = new Thickness(0, 10, 0, 0);
-                newKeyTextBlock.Text = entry.Key;
-                newKeyTextBlock.FontSize = 14;
-                newKeyTextBlock.Foreground = System.Windows.Media.Brushes.Black;
-                this.metadataStackPanel.Children.Add(newKeyTextBlock);
+                attributesAdded.Add(entry.Key);
+                AddAttributeEditor(entry.Key, entry.Value);
+            }
 
-                TextBox newValueTextBlock = new TextBox();
-                newValueTextBlock.Tag = entry.Key;
-                newValueTextBlock.Text = entry.Value;
-                newValueTextBlock.FontSize = 14;
-                newValueTextBlock.Background = System.Windows.Media.Brushes.White;
-                newValueTextBlock.Foreground = System.Windows.Media.Brushes.Black;
-                newValueTextBlock.TextChanged += new TextChangedEventHandler(newValueTextBlock_TextChanged);
-                this.metadataStackPanel.Children.Add(newValueTextBlock);
+            // Ensure all possible elements are edited
+            foreach (string elementName in Schema.MakeContainerElementList())
+            {
+                if (!attributesAdded.Contains(elementName))
+                {
+                    AddAttributeEditor(elementName, "");
+                }
             }
         }
 
         private void fixButton_Click(object sender, RoutedEventArgs e)
         {
-            MessageBox.Show("No fix policy; no doing anything");
+            MessageBox.Show("No fix policy; not doing anything");
         }
 
         /// <summary>
