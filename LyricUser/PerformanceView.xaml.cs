@@ -111,7 +111,7 @@ namespace LyricUser
             // Ensure all possible elements are edited
             foreach (string elementName in Schema.MakeContainerElementList())
             {
-                if (!attributesAdded.Contains(elementName))
+                if (!attributesAdded.Contains(elementName) && elementName != Schema.LyricsElementName)
                 {
                     AddAttributeEditor(elementName, "");
                 }
