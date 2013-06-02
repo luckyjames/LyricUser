@@ -26,6 +26,7 @@ namespace LyricUser
 
         public string nodePath;
         public string nodeName;
+        public string artistFolderName;
         public string artistFolderPath;
         public bool isFile;
         public bool isFolder;
@@ -34,11 +35,12 @@ namespace LyricUser
         public LyricsTreeNodePresenter(string path)
         {
             this.nodePath = path;
-            this.nodeName = path.Substring(path.LastIndexOf(Path.DirectorySeparatorChar) + 1);
+            this.nodeName = Path.GetFileName(path);
             this.isFile = File.Exists(nodePath);
             this.isFolder = Directory.Exists(nodePath);
             this.isFavourite = GetLyricsIsFavourite(nodePath);
             this.artistFolderPath = this.isFolder ? nodePath : Path.GetDirectoryName(nodePath);
+            this.artistFolderName = Path.GetFileName(artistFolderPath);
         }
     }
 

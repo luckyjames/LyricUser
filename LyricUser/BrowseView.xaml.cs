@@ -208,6 +208,43 @@ namespace LyricUser
             }
         }
 
+        private LyricsTreeViewItem RootNode
+        {
+            get
+            {
+                LyricsTreeViewItem root = fileTree.Items[0] as LyricsTreeViewItem;
+                if (null == root)
+                {
+                    throw new ApplicationException("Bad root");
+                }
+                else
+                {
+                    return root;
+                }
+            }
+        }
+
+        public static string InputBox(string title, string promptText)
+        {
+            return Microsoft.VisualBasic.Interaction.InputBox(promptText, title, "Default", 0, 0);
+        }
+
+        private LyricsTreeViewItem AddArtist(string artistName)
+        {
+            string artistFolderPath = Path.Combine(this.RootPath, artistName);
+            if (Directory.Exists(artistFolderPath))
+            {
+                throw new ApplicationException("Folder already exists " + artistFolderPath);
+            }
+            else
+            {
+                Directory.CreateDirectory(artistFolderPath);
+                LyricsTreeViewItem newNode = new LyricsTreeViewItem(artistFolderPath);
+                RootNode.Items.Add(newNode);
+                return newNode;
+            }
+        }
+
         private void newButton_Click(object sender, RoutedEventArgs e)
         {
             LyricsTreeViewItem currentItem = this.fileTree.SelectedItem as LyricsTreeViewItem;
@@ -217,9 +254,22 @@ namespace LyricUser
             }
             else
             {
-                bool isKnownArtist = currentItem.NodePresenter.isFolder && null != currentItem.Parent;
-                string artistName = isKnownArtist ? currentItem.NodePresenter.nodeName : "_NEWARTIST_";
-                string songName = "_NEWSONG_";
+                string songName = InputBox("New Song..", "Choose new song name..");
+                if (string.IsNullOrEmpty(songName))
+                {
+                    return;
+                }
+                LyricsTreeViewItem artistNode = currentItem.Parent as LyricsTreeViewItem;
+                if (null == artistNode)
+                {
+                    string newArtistName = InputBox("New Artist..", "Choose new artist name..");
+                    if (string.IsNullOrEmpty(newArtistName))
+                    {
+                        return;
+                    }
+                    artistNode = AddArtist(newArtistName);
+                }
+                string artistName = artistNode.NodePresenter.nodeName;
 
                 IDictionary<string, string> values = new Dictionary<string, string>();
                 values.Add(Schema.ArtistElementName, artistName);
@@ -230,18 +280,44 @@ namespace LyricUser
                 values.Add(Schema.SingableElementName, "true");
                 values.Add(Schema.LyricsElementName, "");
 
-                string newFilePath = Path.Combine(this.RootPath, artistName, songName + ".xml");
+                string newFilePath = Path.Combine(artistNode.NodePresenter.nodePath, songName + ".xml");
                 XmlLyricsFileWritingStrategy.WriteToFile(newFilePath, values);
                 
                 if (currentItem.NodePresenter.isFolder)
                 {
                     currentItem.PopulateFolderNode();
                 }
+                else
+                {
+                    LyricsTreeViewItem parent = currentItem.Parent as LyricsTreeViewItem;
+                    if (null != parent)
+                    {
+                        parent.PopulateFolderNode();
+                    }
+                }
             }
         }
 
         private void renameButton_Click(object sender, RoutedEventArgs e)
         {
+            LyricsTreeViewItem currentItem = this.fileTree.SelectedItem as LyricsTreeViewItem;
+            if (null == currentItem)
+            {
+                throw new ApplicationException("No node selected is not a LyricsTreeViewItem!");
+            }
+            else
+            {
+                if (currentItem.NodePresenter.isFolder)
+                {
+                    // Update file system
+                    // Update lyrics file contents
+                }
+                else
+                {
+                    // Update file system
+                    // Update lyrics file contents
+                }
+            }
         }
 
         private void favouritesCheckBox_Checked(object sender, RoutedEventArgs e)
