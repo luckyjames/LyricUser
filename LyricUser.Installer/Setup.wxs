@@ -36,6 +36,11 @@
                     Description="Starts the LyricsUser application"
                     Target="[APPLICATIONROOTDIRECTORY]LyricUser.exe"
                     WorkingDirectory="APPLICATIONROOTDIRECTORY"/>
+                <Shortcut Id="UninstallProduct"             
+                          Name="Uninstall LyricsUser"
+                          Target="[SystemFolder]msiexec.exe"
+                          Arguments="/x [ProductCode]"
+                          Description="Uninstalls LyricsUser" />
                 <RemoveFolder Id="ApplicationProgramsFolder" On="uninstall"/>
                 <RegistryValue Root="HKCU" Key="Software\Microsoft\MyApplicationName"
                                Name="installed" Type="integer" Value="1" KeyPath="yes"/>
