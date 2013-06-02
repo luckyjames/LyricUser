@@ -17,7 +17,7 @@ namespace LyricUser
     /// </summary>
     public partial class BrowseView : Window
     {
-        private static void FilterVisibleNodes(Object stateInfo)
+        private static void PopulateTree(Object stateInfo)
         {
             BrowseView view = ((BrowseView)stateInfo);
 
@@ -45,9 +45,9 @@ namespace LyricUser
             }
         }
 
-        private void BeginFilter()
+        private void StartUpdatingVisibleFilter()
         {
-            ThreadPool.QueueUserWorkItem(new WaitCallback(FilterVisibleNodes), this);
+            ThreadPool.QueueUserWorkItem(new WaitCallback(PopulateTree), this);
         }
 
         private static string GetProductName()
@@ -92,13 +92,31 @@ namespace LyricUser
             }
         }
 
+        private static string DetermineInitialFolder()
+        {
+            LyricUserApplication lyricsApp = Application.Current as LyricUserApplication;
+            if (null == lyricsApp)
+            {
+                throw new ApplicationException("Bad type of application");
+            }
+            else
+            {
+                if (lyricsApp.StartupArguments.Args.Length > 0)
+                {
+                    return lyricsApp.StartupArguments.Args[0];
+                }
+                else
+                {
+                    return LyricUser.Properties.Settings.Default.LastOpenedLyricsFolder;
+                }
+            }
+        }
         public BrowseView()
         {
             InitializeComponent();
 
-            // Initialise root path with the last user folder after controls are constructed but
-            //  before it is set by the application using this form
-            RootPath = LyricUser.Properties.Settings.Default.LastOpenedLyricsFolder;
+            // Initialise root path before it is set by the application using this form
+            this.RootPath = DetermineInitialFolder();
 
             this.Title = String.Concat(GetProductName(), " ", GetApplicationVersionString());
         }
@@ -127,7 +145,12 @@ namespace LyricUser
             }
             set
             {
-                onlyFavouritesVisible = value;
+                if (onlyFavouritesVisible != value)
+                {
+                    onlyFavouritesVisible = value;
+
+                    StartUpdatingVisibleFilter();
+                }
             }
         }
 
@@ -156,8 +179,8 @@ namespace LyricUser
 
                 if (this.favouritesCheckBox.IsChecked.HasValue && this.favouritesCheckBox.IsChecked.Value)
                 {
-	                // Once tree populated, start background thread to find favourites
-	                BeginFilter();
+                    // Once tree populated, start background thread to find favourites
+                    StartUpdatingVisibleFilter();
                 }
             }
         }
@@ -183,6 +206,42 @@ namespace LyricUser
                 default:
                     throw new NotImplementedException(result.ToString());
             }
+        }
+
+        private void newButton_Click(object sender, RoutedEventArgs e)
+        {
+            LyricsTreeViewItem currentItem = this.fileTree.SelectedItem as LyricsTreeViewItem;
+            if (null == currentItem)
+            {
+                throw new ApplicationException("No node selected to insert new lyrics!");
+            }
+            else
+            {
+                bool isKnownArtist = currentItem.NodePresenter.isFolder && null != currentItem.Parent;
+                string artistName = isKnownArtist ? currentItem.NodePresenter.nodeName : "_NEWARTIST_";
+                string songName = "_NEWSONG_";
+
+                IDictionary<string, string> values = new Dictionary<string, string>();
+                values.Add(Schema.ArtistElementName, artistName);
+                values.Add(Schema.TitleElementName, songName);
+                values.Add(Schema.CapoElementName, "");
+                values.Add(Schema.KeyElementName, "");
+                values.Add(Schema.FavouriteElementName, "true");
+                values.Add(Schema.SingableElementName, "true");
+                values.Add(Schema.LyricsElementName, "");
+
+                string newFilePath = Path.Combine(this.RootPath, artistName, songName + ".xml");
+                XmlLyricsFileWritingStrategy.WriteToFile(newFilePath, values);
+                
+                if (currentItem.NodePresenter.isFolder)
+                {
+                    currentItem.PopulateFolderNode();
+                }
+            }
+        }
+
+        private void renameButton_Click(object sender, RoutedEventArgs e)
+        {
         }
 
         private void favouritesCheckBox_Checked(object sender, RoutedEventArgs e)

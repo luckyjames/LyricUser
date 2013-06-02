@@ -8,9 +8,50 @@ using System.Threading;
 
 namespace LyricUser
 {
+    struct LyricsTreeNodePresenter
+    {
+        static private bool GetLyricsIsFavourite(string lyricsFilePath)
+        {
+            if (".xml" != Path.GetExtension(lyricsFilePath))
+            {
+                return false;
+            }
+            else
+            {
+                XmlLyricsFileParsingStrategy parser = new XmlLyricsFileParsingStrategy(lyricsFilePath);
+
+                return parser.GetLyricsIsFavourite();
+            }
+        }
+
+        public string nodePath;
+        public string nodeName;
+        public string artistFolderPath;
+        public bool isFile;
+        public bool isFolder;
+        public bool isFavourite;
+
+        public LyricsTreeNodePresenter(string path)
+        {
+            this.nodePath = path;
+            this.nodeName = path.Substring(path.LastIndexOf(Path.DirectorySeparatorChar) + 1);
+            this.isFile = File.Exists(nodePath);
+            this.isFolder = Directory.Exists(nodePath);
+            this.isFavourite = GetLyricsIsFavourite(nodePath);
+            this.artistFolderPath = this.isFolder ? nodePath : Path.GetDirectoryName(nodePath);
+        }
+    }
+
     class LyricsTreeViewItem : TreeViewItem
     {
-        private readonly string nodePath;
+        private readonly LyricsTreeNodePresenter nodePresenter;
+        public LyricsTreeNodePresenter NodePresenter
+        {
+            get
+            {
+                return this.nodePresenter;
+            }
+        }
 
         /// <summary>
         /// Indicates that a file is a favourite, or an artist has favourite files
@@ -39,29 +80,15 @@ namespace LyricUser
             }
         }
 
-        static private bool GetLyricsIsFavourite(string lyricsFilePath)
-        {
-            if (".xml" != Path.GetExtension(lyricsFilePath))
-            {
-                return false;
-            }
-            else
-            {
-                XmlLyricsFileParsingStrategy parser = new XmlLyricsFileParsingStrategy(lyricsFilePath);
-
-                return parser.GetLyricsIsFavourite();
-            }
-        }
-
         public LyricsTreeViewItem(string nodePath)
         {
-            this.nodePath = nodePath;
+            this.nodePresenter = new LyricsTreeNodePresenter(nodePath);
 
-            this.Header = nodePath.Substring(nodePath.LastIndexOf(Path.DirectorySeparatorChar) + 1);
-            this.Tag = nodePath;
+            this.Header = nodePresenter.nodeName;
+            this.Tag = nodePresenter.nodePath;
             try
             {
-                if (Directory.Exists(nodePath))
+                if (nodePresenter.isFolder)
                 {
                     // add a dummy sub-item so it can be expanded
                     this.Items.Add(new TreeViewItem());
@@ -70,13 +97,12 @@ namespace LyricUser
                     // Ensure font weight is set so that it is not inherited
                     this.FontWeight = FontWeights.Normal;
                 }
-                else if (File.Exists(nodePath))
+                else if (nodePresenter.isFile)
                 {
-                    this.isFavourite = GetLyricsIsFavourite(nodePath);
+                    this.isFavourite = nodePresenter.isFavourite;
 
                     this.MouseDoubleClick += new MouseButtonEventHandler(fileTreeViewItem_MouseDoubleClick);
 
-                    this.IsInvisible = !isFavourite.Value;
                     if (isFavourite.Value)
                     {
                         this.FontWeight = FontWeights.Bold;
@@ -176,7 +202,7 @@ namespace LyricUser
                 }
 
                 Nullable<bool> descendantsAreFavourites = HasDescendentsThatAreFavourites();
-                this.IsInvisible = (descendantsAreFavourites.HasValue && !descendantsAreFavourites.Value);
+                this.isFavourite = (descendantsAreFavourites.HasValue && !descendantsAreFavourites.Value);
             }
         }
 

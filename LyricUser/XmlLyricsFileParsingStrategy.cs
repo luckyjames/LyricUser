@@ -19,29 +19,6 @@ namespace LyricUser
     /// </remarks>
     public class XmlLyricsFileParsingStrategy
     {
-        private class Schema
-        {
-            public const string DocumentElementName = "document";
-            public const string ArtistElementName = "artist";
-            public const string TitleElementName = "title";
-            public const string CapoElementName = "capo";
-            public const string KeyElementName = "key";
-            public const string FavouriteElementName = "favourite";
-            public const string LyricsElementName = "lyrics";
-
-            public static IList<string> MakeContainerElementList()
-            {
-                IList<string> elements = new List<string>();
-                elements.Add(ArtistElementName);
-                elements.Add(TitleElementName);
-                elements.Add(CapoElementName);
-                elements.Add(KeyElementName);
-                elements.Add(FavouriteElementName);
-                elements.Add(LyricsElementName);
-                return elements;
-            }
-        }
-
         private readonly string xmlFileUrl;
         public string XmlFileUrl
         {

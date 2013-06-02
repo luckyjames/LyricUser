@@ -31,6 +31,7 @@
     <UseApplicationTrust>false</UseApplicationTrust>
     <PublishWizardCompleted>true</PublishWizardCompleted>
     <BootstrapperEnabled>true</BootstrapperEnabled>
+    <NoWin32Manifest>False</NoWin32Manifest>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|x86' ">
     <PlatformTarget>x86</PlatformTarget>
@@ -65,6 +66,12 @@
   <PropertyGroup>
     <SignManifests>true</SignManifests>
   </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)' == 'Debug' ">
+    <StartAction>Project</StartAction>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)' == 'Release' ">
+    <StartAction>Project</StartAction>
+  </PropertyGroup>
   <ItemGroup>
     <ApplicationDefinition Include="LyricUserApplication.xaml">
       <Generator>MSBuild:Compile</Generator>
@@ -73,6 +80,7 @@
     <Compile Include="BrowseView.xaml.cs">
       <DependentUpon>BrowseView.xaml</DependentUpon>
     </Compile>
+    <Compile Include="Schema.cs" />
     <Compile Include="StaticLyricsTidier.cs" />
     <Compile Include="XmlLyricsFileWritingStrategy.cs" />
     <Compile Include="IPerformableLyrics.cs" />
