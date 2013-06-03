@@ -45,7 +45,7 @@ namespace LyricUser
             }
         }
 
-        private void StartUpdatingVisibleFilter()
+        private void StartUpdatingAppearanceOfFavourites()
         {
             ThreadPool.QueueUserWorkItem(new WaitCallback(PopulateTree), this);
         }
@@ -149,7 +149,7 @@ namespace LyricUser
                 {
                     onlyFavouritesVisible = value;
 
-                    StartUpdatingVisibleFilter();
+                    StartUpdatingAppearanceOfFavourites();
                 }
             }
         }
@@ -180,7 +180,7 @@ namespace LyricUser
                 if (this.favouritesCheckBox.IsChecked.HasValue && this.favouritesCheckBox.IsChecked.Value)
                 {
                     // Once tree populated, start background thread to find favourites
-                    StartUpdatingVisibleFilter();
+                    StartUpdatingAppearanceOfFavourites();
                 }
             }
         }

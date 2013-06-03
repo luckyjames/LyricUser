@@ -43,6 +43,28 @@ namespace LyricUser
             }
         }
 
+        public readonly string nodePath;
+        public readonly string nodeName;
+        public readonly string artistFolderName;
+        public readonly string artistFolderPath;
+        public readonly NodeType type;
+        public readonly bool isFile;
+        public readonly bool isFolder;
+
+        public LyricsTreeNodePresenter(string path)
+        {
+            this.nodePath = path;
+            this.nodeName = Path.GetFileName(path);
+            this.type = DetermineNodeType(path);
+            this.isFile = (type == NodeType.Song);
+            this.isFolder = !isFile;
+            this.artistFolderPath = this.isFolder ? nodePath : Path.GetDirectoryName(nodePath);
+            this.artistFolderName = Path.GetFileName(artistFolderPath);
+        }
+    }
+
+    class LyricsTreeViewItem : TreeViewItem
+    {
         static private bool GetLyricsIsFavourite(string lyricsFilePath)
         {
             if (".xml" != Path.GetExtension(lyricsFilePath))
@@ -52,35 +74,10 @@ namespace LyricUser
             else
             {
                 XmlLyricsFileParsingStrategy parser = new XmlLyricsFileParsingStrategy(lyricsFilePath);
-
                 return parser.GetLyricsIsFavourite();
             }
         }
 
-        public readonly string nodePath;
-        public readonly string nodeName;
-        public readonly string artistFolderName;
-        public readonly string artistFolderPath;
-        public readonly NodeType type;
-        public readonly bool isFile;
-        public readonly bool isFolder;
-        public readonly bool isFavourite;
-
-        public LyricsTreeNodePresenter(string path)
-        {
-            this.nodePath = path;
-            this.nodeName = Path.GetFileName(path);
-            this.type = DetermineNodeType(path);
-            this.isFile = (type == NodeType.Song);
-            this.isFolder = !isFile;
-            this.isFavourite = GetLyricsIsFavourite(nodePath);
-            this.artistFolderPath = this.isFolder ? nodePath : Path.GetDirectoryName(nodePath);
-            this.artistFolderName = Path.GetFileName(artistFolderPath);
-        }
-    }
-
-    class LyricsTreeViewItem : TreeViewItem
-    {
         private readonly LyricsTreeNodePresenter nodePresenter;
         public LyricsTreeNodePresenter NodePresenter
         {
@@ -117,39 +114,18 @@ namespace LyricUser
             }
         }
 
-        private void UpdateAppearance()
+        private void UpdateIsFavourite()
         {
-            this.Header = nodePresenter.nodeName;
-            this.Tag = nodePresenter.nodePath;
             try
             {
                 if (nodePresenter.isFolder)
                 {
-                    // add a dummy sub-item so it can be expanded
-                    this.Expanded += new RoutedEventHandler(folderTreeViewItem_Expanded);
-
-                    // Ensure font weight is set so that it is not inherited
-                    this.FontWeight = FontWeights.Normal;
-                }
-                else if (nodePresenter.isFile)
-                {
-                    this.isFavourite = nodePresenter.isFavourite;
-
-                    this.MouseDoubleClick += new MouseButtonEventHandler(fileTreeViewItem_MouseDoubleClick);
-
-                    if (isFavourite.Value)
-                    {
-                        this.FontWeight = FontWeights.Bold;
-                    }
-                    else
-                    {
-                        this.FontWeight = FontWeights.Normal;
-                    }
+                    Nullable<bool> descendantsAreFavourites = HasDescendentsThatAreFavourites();
+                    this.isFavourite = (descendantsAreFavourites.HasValue && descendantsAreFavourites.Value);
                 }
                 else
                 {
-                    throw new ApplicationException(
-                        "itemPath does not exist - " + nodePresenter.nodePath + ". CD = " + Directory.GetCurrentDirectory());
+                    this.isFavourite = GetLyricsIsFavourite(nodePresenter.nodePath);
                 }
             }
             catch (System.Exception exception)
@@ -160,17 +136,51 @@ namespace LyricUser
             }
         }
 
+        private void LazyUpdateIsFavourite()
+        {
+            if (!this.isFavourite.HasValue)
+            {
+                UpdateIsFavourite();
+            }
+        }
+
+        private void UpdateAppearance()
+        {
+            this.Header = nodePresenter.nodeName;
+            this.Tag = nodePresenter.nodePath;
+
+            LazyUpdateIsFavourite();
+
+            if (isFavourite.HasValue && isFavourite.Value)
+            {
+                this.FontWeight = FontWeights.Bold;
+            }
+            else
+            {
+                this.FontWeight = FontWeights.Normal;
+            }
+        }
+
         public LyricsTreeViewItem(string nodePath)
         {
             this.nodePresenter = new LyricsTreeNodePresenter(nodePath);
 
-            this.nodePresenter = new LyricsTreeNodePresenter(nodePath);
-
-            if (NodeType.Song != nodePresenter.type && this.Items.IsEmpty)
+            if (nodePresenter.isFolder)
             {
-                // Add an empty node to folders so they can be expanded
-                this.Items.Add(new TreeViewItem());
+                // add a dummy sub-item so it can be expanded
+                this.Expanded += new RoutedEventHandler(folderTreeViewItem_Expanded);
             }
+            else if (nodePresenter.isFile)
+            {
+                this.MouseDoubleClick += new MouseButtonEventHandler(fileTreeViewItem_MouseDoubleClick);
+            }
+            else
+            {
+                throw new ApplicationException(
+                    "itemPath does not exist - " + nodePresenter.nodePath + ". CD = " + Directory.GetCurrentDirectory());
+            }
+
+            RepopulateFolderNode();
 
             UpdateAppearance();
         }
@@ -243,23 +253,21 @@ namespace LyricUser
             // only one child with no text - this is the first expansion
             this.Items.Clear();
 
-            foreach (string s in Directory.EnumerateFileSystemEntries(this.Tag.ToString()))
+            if (nodePresenter.isFolder)
             {
-                AddTreeItem(this, new LyricsTreeViewItem(s));
+                foreach (string s in Directory.EnumerateFileSystemEntries(this.nodePresenter.nodePath))
+                {
+                    AddTreeItem(this, new LyricsTreeViewItem(s));
+                }
             }
-
-            Nullable<bool> descendantsAreFavourites = HasDescendentsThatAreFavourites();
-            this.isFavourite = (descendantsAreFavourites.HasValue && !descendantsAreFavourites.Value);
-
-            UpdateAppearance();
         }
 
         public void LazyPopulateFolderNode()
         {
-            if (this.Items.Count == 1 && string.IsNullOrEmpty(((TreeViewItem)this.Items[0]).Tag as string))
-            {
-                RepopulateFolderNode();
-            }
+            Nullable<bool> descendantsAreFavourites = HasDescendentsThatAreFavourites();
+            this.isFavourite = (descendantsAreFavourites.HasValue && descendantsAreFavourites.Value);
+
+            UpdateAppearance();
         }
 
         public LyricsTreeViewItem GetArtistNode()
