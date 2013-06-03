@@ -26,7 +26,7 @@ namespace LyricUser
             // This code is expected to be called on the threadpool, invoke using the dispatcher and
             //  wait for the result
             System.Windows.Threading.DispatcherOperation token = view.Dispatcher.BeginInvoke(
-                (Action)(() => { rootItem.PopulateFolderNode(); }));
+                (Action)(() => { rootItem.LazyPopulateFolderNode(); }));
             token.Wait();
 
             foreach (TreeViewItem descendent in rootItem.Items)
@@ -36,7 +36,7 @@ namespace LyricUser
                 {
                     // Use background priority to try and give priority to user interactions
                     System.Windows.Threading.DispatcherOperation artistNodeToken = view.Dispatcher.BeginInvoke(
-                        (Action)(() => { artistItem.PopulateFolderNode(); }),
+                        (Action)(() => { artistItem.LazyPopulateFolderNode(); }),
                         System.Windows.Threading.DispatcherPriority.Background);
                     // Wait for the artist node population to finish before queueing the next one, otherwise
                     //  the GUI becomes very unresponsive
@@ -259,7 +259,7 @@ namespace LyricUser
                 {
                     return;
                 }
-                LyricsTreeViewItem artistNode = currentItem.Parent as LyricsTreeViewItem;
+                LyricsTreeViewItem artistNode = currentItem.GetArtistNode();
                 if (null == artistNode)
                 {
                     string newArtistName = InputBox("New Artist..", "Choose new artist name..");
@@ -283,17 +283,21 @@ namespace LyricUser
                 string newFilePath = Path.Combine(artistNode.NodePresenter.nodePath, songName + ".xml");
                 XmlLyricsFileWritingStrategy.WriteToFile(newFilePath, values);
                 
-                if (currentItem.NodePresenter.isFolder)
+                switch (currentItem.NodePresenter.type)
                 {
-                    currentItem.PopulateFolderNode();
-                }
-                else
-                {
-                    LyricsTreeViewItem parent = currentItem.Parent as LyricsTreeViewItem;
-                    if (null != parent)
-                    {
-                        parent.PopulateFolderNode();
-                    }
+                    case NodeType.Song:
+                        LyricsTreeViewItem parent = currentItem.Parent as LyricsTreeViewItem;
+                        if (null != parent)
+                        {
+                            parent.RepopulateFolderNode();
+                        }
+                        break;
+                    case NodeType.Artist:
+                    case NodeType.Folder:
+                        currentItem.RepopulateFolderNode();
+                        break;
+                    default:
+                        throw new Exception("Invalid value for NodeType");
                 }
             }
         }

@@ -8,8 +8,41 @@ using System.Threading;
 
 namespace LyricUser
 {
+    enum NodeType
+    {
+        Song,
+        Artist,
+        Folder
+    }
+
     struct LyricsTreeNodePresenter
     {
+        static bool FolderContainsLyrics(string folderPath)
+        {
+            foreach (var file in Directory.EnumerateFiles(folderPath))
+            {
+                return true;
+            }
+            return false;
+        }
+
+        static NodeType DetermineNodeType(string nodePath)
+        {
+            if (File.Exists(nodePath))
+            {
+                return NodeType.Song;
+            }
+            else if (FolderContainsLyrics(nodePath))
+            {
+                // there is one or more files in the folder
+                return NodeType.Artist;
+            }
+            else
+            {
+                return NodeType.Folder;
+            }
+        }
+
         static private bool GetLyricsIsFavourite(string lyricsFilePath)
         {
             if (".xml" != Path.GetExtension(lyricsFilePath))
@@ -24,20 +57,22 @@ namespace LyricUser
             }
         }
 
-        public string nodePath;
-        public string nodeName;
-        public string artistFolderName;
-        public string artistFolderPath;
-        public bool isFile;
-        public bool isFolder;
-        public bool isFavourite;
+        public readonly string nodePath;
+        public readonly string nodeName;
+        public readonly string artistFolderName;
+        public readonly string artistFolderPath;
+        public readonly NodeType type;
+        public readonly bool isFile;
+        public readonly bool isFolder;
+        public readonly bool isFavourite;
 
         public LyricsTreeNodePresenter(string path)
         {
             this.nodePath = path;
             this.nodeName = Path.GetFileName(path);
-            this.isFile = File.Exists(nodePath);
-            this.isFolder = Directory.Exists(nodePath);
+            this.type = DetermineNodeType(path);
+            this.isFile = (type == NodeType.Song);
+            this.isFolder = !isFile;
             this.isFavourite = GetLyricsIsFavourite(nodePath);
             this.artistFolderPath = this.isFolder ? nodePath : Path.GetDirectoryName(nodePath);
             this.artistFolderName = Path.GetFileName(artistFolderPath);
@@ -82,10 +117,8 @@ namespace LyricUser
             }
         }
 
-        public LyricsTreeViewItem(string nodePath)
+        private void UpdateAppearance()
         {
-            this.nodePresenter = new LyricsTreeNodePresenter(nodePath);
-
             this.Header = nodePresenter.nodeName;
             this.Tag = nodePresenter.nodePath;
             try
@@ -93,7 +126,6 @@ namespace LyricUser
                 if (nodePresenter.isFolder)
                 {
                     // add a dummy sub-item so it can be expanded
-                    this.Items.Add(new TreeViewItem());
                     this.Expanded += new RoutedEventHandler(folderTreeViewItem_Expanded);
 
                     // Ensure font weight is set so that it is not inherited
@@ -117,15 +149,30 @@ namespace LyricUser
                 else
                 {
                     throw new ApplicationException(
-                        "itemPath does not exist - " + nodePath + ". CD = " + Directory.GetCurrentDirectory());
+                        "itemPath does not exist - " + nodePresenter.nodePath + ". CD = " + Directory.GetCurrentDirectory());
                 }
             }
             catch (System.Exception exception)
             {
                 this.Foreground = System.Windows.Media.Brushes.Red;
 
-                XmlLyricsFileParsingStrategy.RecoverBadXml(nodePath, exception);
+                XmlLyricsFileParsingStrategy.RecoverBadXml(nodePresenter.nodePath, exception);
             }
+        }
+
+        public LyricsTreeViewItem(string nodePath)
+        {
+            this.nodePresenter = new LyricsTreeNodePresenter(nodePath);
+
+            this.nodePresenter = new LyricsTreeNodePresenter(nodePath);
+
+            if (NodeType.Song != nodePresenter.type && this.Items.IsEmpty)
+            {
+                // Add an empty node to folders so they can be expanded
+                this.Items.Add(new TreeViewItem());
+            }
+
+            UpdateAppearance();
         }
 
         private static void AddTreeItem(ItemsControl itemsControl, TreeViewItem newItem)
@@ -191,20 +238,42 @@ namespace LyricUser
             }
         }
 
-        public void PopulateFolderNode()
+        public void RepopulateFolderNode()
+        {
+            // only one child with no text - this is the first expansion
+            this.Items.Clear();
+
+            foreach (string s in Directory.EnumerateFileSystemEntries(this.Tag.ToString()))
+            {
+                AddTreeItem(this, new LyricsTreeViewItem(s));
+            }
+
+            Nullable<bool> descendantsAreFavourites = HasDescendentsThatAreFavourites();
+            this.isFavourite = (descendantsAreFavourites.HasValue && !descendantsAreFavourites.Value);
+
+            UpdateAppearance();
+        }
+
+        public void LazyPopulateFolderNode()
         {
             if (this.Items.Count == 1 && string.IsNullOrEmpty(((TreeViewItem)this.Items[0]).Tag as string))
             {
-                // only one child with no text - this is the first expansion
-                this.Items.Clear();
+                RepopulateFolderNode();
+            }
+        }
 
-                foreach (string s in Directory.EnumerateFileSystemEntries(this.Tag.ToString()))
-                {
-                    AddTreeItem(this, new LyricsTreeViewItem(s));
-                }
-
-                Nullable<bool> descendantsAreFavourites = HasDescendentsThatAreFavourites();
-                this.isFavourite = (descendantsAreFavourites.HasValue && !descendantsAreFavourites.Value);
+        public LyricsTreeViewItem GetArtistNode()
+        {
+            switch (NodePresenter.type)
+            {
+                case NodeType.Song:
+                    return this.Parent as LyricsTreeViewItem;
+                case NodeType.Artist:
+                    return this;
+                case NodeType.Folder:
+                    return null;
+                default:
+                    throw new Exception("Invalid value for NodeType");
             }
         }
 
@@ -212,7 +281,7 @@ namespace LyricUser
         {
             TreeViewItem item = sender as TreeViewItem;
 
-            PopulateFolderNode();
+            LazyPopulateFolderNode();
         }
 
         private void fileTreeViewItem_MouseDoubleClick(object sender, MouseButtonEventArgs e)
