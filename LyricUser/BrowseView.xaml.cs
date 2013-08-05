@@ -169,6 +169,7 @@ namespace LyricUser
             }
             return null;
         }
+
         private void SelectNextItem(string prefix)
         {
             TreeViewItem treeViewItem = FindFirstArtistWithPrefix(prefix);
