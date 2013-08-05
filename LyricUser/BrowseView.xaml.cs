@@ -119,6 +119,74 @@ namespace LyricUser
             this.RootPath = DetermineInitialFolder();
 
             this.Title = String.Concat(GetProductName(), " ", GetApplicationVersionString());
+            
+            this.KeyDown += new KeyEventHandler(BrowseView_KeyDown);  
+            this.TextInput += new TextCompositionEventHandler(BrowseView_TextInput);
+        }
+
+        void BrowseView_TextInput(object sender, TextCompositionEventArgs e)
+        {
+            if (string.IsNullOrEmpty(e.Text))
+            {
+                // ignore empty input
+            }
+            else
+            {
+                SelectNextItem(e.Text);
+            }
+        }
+
+        LyricsTreeViewItem RootItem
+        {
+            get
+            {
+                LyricsTreeViewItem root = this.fileTree.Items[0] as LyricsTreeViewItem;
+                if (null == root)
+                {
+                    throw new ApplicationException("There must be a root item in the tree");
+                }
+                else
+                {
+                    return root;
+                }
+            }
+        }
+        /// <summary>
+        /// We want to find the artist names not lyrics or root
+        /// </summary>
+        /// <param name="prefix"></param>
+        /// <returns></returns>
+        private TreeViewItem FindFirstArtistWithPrefix(string prefix)
+        {
+            foreach (LyricsTreeViewItem lyricsItem in this.RootItem.Items)
+            {
+                string nodeName = lyricsItem.NodePresenter.artistFolderName;
+                if (!string.IsNullOrEmpty(nodeName)
+                    && nodeName.StartsWith(prefix, StringComparison.InvariantCultureIgnoreCase))
+                {
+                    return lyricsItem;
+                }
+            }
+            return null;
+        }
+        private void SelectNextItem(string prefix)
+        {
+            TreeViewItem treeViewItem = FindFirstArtistWithPrefix(prefix);
+            if (null != treeViewItem)
+            {
+                treeViewItem.IsSelected = true;
+            }
+        }
+
+        void BrowseView_KeyDown(object sender, KeyEventArgs e)
+        {
+            if (Key.A > e.Key || Key.Z < e.Key)
+            {
+                // Ignored
+            }
+            else
+            {
+            }
         }
 
         private string rootPath;
