@@ -49,7 +49,7 @@ namespace LyricUser.Test
         public void GetFavourite()
         {
             XmlLyricsFileParsingStrategy xmlLyricsFileParsingStrategy = new XmlLyricsFileParsingStrategy(relativePathToTestData);
-            bool favouriteValue = xmlLyricsFileParsingStrategy.ReadValue<bool>("favourite");
+            bool favouriteValue = xmlLyricsFileParsingStrategy.ReadToFirstValue<bool>("favourite");
             Assert.AreEqual(true, favouriteValue);
         }
     }
