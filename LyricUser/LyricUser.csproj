@@ -80,6 +80,7 @@
     <Compile Include="BrowseView.xaml.cs">
       <DependentUpon>BrowseView.xaml</DependentUpon>
     </Compile>
+    <Compile Include="LyricsTreeNodePresenter.cs" />
     <Compile Include="Schema.cs" />
     <Compile Include="StaticLyricsTidier.cs" />
     <Compile Include="XmlLyricsFileWritingStrategy.cs" />
