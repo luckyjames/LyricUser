@@ -106,7 +106,7 @@ namespace LyricUser
         /// <summary>
         /// Indicates that a file is a favourite, or an artist has favourite files
         /// </summary>
-        private Nullable<bool> isFavourite;
+        private Nullable<bool> isHighted;
 
         private bool IsInvisible
         {
@@ -130,18 +130,18 @@ namespace LyricUser
             }
         }
 
-        private void UpdateIsFavourite()
+        private void UpdateWhetherHighlighted()
         {
             try
             {
                 if (nodePresenter.IsFolder)
                 {
-                    Nullable<bool> descendantsAreFavourites = HasDescendentsThatAreFavourites();
-                    this.isFavourite = (descendantsAreFavourites.HasValue && descendantsAreFavourites.Value);
+                    Nullable<bool> descendentsAreHighlighted = HasDescendentsThatAreHighlighted();
+                    this.isHighted = (descendentsAreHighlighted.HasValue && descendentsAreHighlighted.Value);
                 }
                 else
                 {
-                    this.isFavourite = GetLyricsIsFavourite(nodePresenter.nodePath);
+                    this.isHighted = GetLyricsIsFavourite(nodePresenter.nodePath);
                 }
             }
             catch (System.Exception exception)
@@ -152,11 +152,11 @@ namespace LyricUser
             }
         }
 
-        private void LazyUpdateIsFavourite()
+        private void LazyUpdateWhetherHighlighted()
         {
-            if (!this.isFavourite.HasValue)
+            if (!this.isHighted.HasValue)
             {
-                UpdateIsFavourite();
+                UpdateWhetherHighlighted();
             }
         }
 
@@ -165,9 +165,9 @@ namespace LyricUser
             this.Header = nodePresenter.nodeName;
             this.Tag = nodePresenter.nodePath;
 
-            LazyUpdateIsFavourite();
+            LazyUpdateWhetherHighlighted();
 
-            if (isFavourite.HasValue && isFavourite.Value)
+            if (isHighted.HasValue && isHighted.Value)
             {
                 this.FontWeight = FontWeights.Bold;
             }
@@ -216,12 +216,12 @@ namespace LyricUser
             }
         }
 
-        public Nullable<bool> HasDescendentsThatAreFavourites()
+        public Nullable<bool> HasDescendentsThatAreHighlighted()
         {
-            if (this.isFavourite.HasValue)
+            if (this.isHighted.HasValue)
             {
                 // If current node has determined value, stop recursion
-                return this.isFavourite;
+                return this.isHighted;
             }
             else
             {
@@ -243,7 +243,7 @@ namespace LyricUser
                         }
                         else
                         {
-                            Nullable<bool> childResult = childLyricsTreeViewItem.HasDescendentsThatAreFavourites();
+                            Nullable<bool> childResult = childLyricsTreeViewItem.HasDescendentsThatAreHighlighted();
                             if (!childResult.HasValue)
                             {
                                 // we don't know about something
@@ -280,8 +280,8 @@ namespace LyricUser
 
         public void LazyPopulateFolderNode()
         {
-            Nullable<bool> descendantsAreFavourites = HasDescendentsThatAreFavourites();
-            this.isFavourite = (descendantsAreFavourites.HasValue && descendantsAreFavourites.Value);
+            Nullable<bool> descendentsAreHighlighted = HasDescendentsThatAreHighlighted();
+            this.isHighted = (descendentsAreHighlighted.HasValue && descendentsAreHighlighted.Value);
 
             UpdateAppearance();
         }
