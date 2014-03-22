@@ -95,9 +95,17 @@ namespace LyricUser
             Button fixButton = new Button();
             fixButton.Content = "Fix";
             fixButton.Click += new RoutedEventHandler(fixButton_Click);
-            fixButton.IsEnabled = false;
+            fixButton.IsEnabled = true;
             fixButton.Padding = new Thickness(0, 10, 0, 0);
             this.metadataStackPanel.Children.Add(fixButton);
+
+            // Fix functionality is currently disabled as there is nothing to do.
+            Button deleteButton = new Button();
+            deleteButton.Content = "Delete";
+            deleteButton.Click += new RoutedEventHandler(deleteButton_Click);
+            deleteButton.IsEnabled = true;
+            deleteButton.Padding = new Thickness(0, 10, 0, 0);
+            this.metadataStackPanel.Children.Add(deleteButton);
 
             SortedSet<string> attributesAdded = new SortedSet<string>();
 
@@ -121,6 +129,16 @@ namespace LyricUser
         private void fixButton_Click(object sender, RoutedEventArgs e)
         {
             MessageBox.Show("No fix policy; not doing anything");
+        }
+
+        private void deleteButton_Click(object sender, RoutedEventArgs e)
+        {
+            MessageBoxResult result = MessageBox.Show("Delete this lyrics file?", "Sure?", MessageBoxButton.OKCancel);
+            if (result == MessageBoxResult.OK)
+            {
+                System.IO.File.Delete(LyricsPresenter.FileName);
+                this.Close();
+            }
         }
 
         /// <summary>
