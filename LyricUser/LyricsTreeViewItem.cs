@@ -18,6 +18,24 @@ namespace LyricUser
     // This class represents the lyrics file in the tree data structure
     struct LyricsTreeNodePresenter
     {
+        public delegate bool Filter(LyricsTreeNodePresenter presenter);
+
+        public static bool NodeIsFavourite(LyricsTreeNodePresenter presenter)
+        {
+            if (".xml" != Path.GetExtension(presenter.nodePath))
+            {
+                return false;
+            }
+            else
+            {
+                XmlLyricsFileParsingStrategy parser = new XmlLyricsFileParsingStrategy(presenter.nodePath);
+                
+                const bool defaultIsFavourite = false;
+
+                return parser.ReadToFirstValue(Schema.FavouriteElementName, defaultIsFavourite );
+            }
+        }
+
         static bool FolderContainsLyrics(string folderPath)
         {
             foreach (var file in Directory.EnumerateFiles(folderPath))
@@ -78,22 +96,6 @@ namespace LyricUser
 
     class LyricsTreeViewItem : TreeViewItem
     {
-        static private bool GetLyricsIsFavourite(string lyricsFilePath)
-        {
-            if (".xml" != Path.GetExtension(lyricsFilePath))
-            {
-                return false;
-            }
-            else
-            {
-                XmlLyricsFileParsingStrategy parser = new XmlLyricsFileParsingStrategy(lyricsFilePath);
-                
-                const bool defaultIsFavourite = false;
-
-                return parser.ReadToFirstValue(Schema.FavouriteElementName, defaultIsFavourite );
-            }
-        }
-
         private readonly LyricsTreeNodePresenter nodePresenter;
         public LyricsTreeNodePresenter NodePresenter
         {
@@ -106,7 +108,7 @@ namespace LyricUser
         /// <summary>
         /// Indicates that a file is a favourite, or an artist has favourite files
         /// </summary>
-        private Nullable<bool> isHighted;
+        private Nullable<bool> isHighlighted;
 
         private bool IsInvisible
         {
@@ -130,18 +132,26 @@ namespace LyricUser
             }
         }
 
-        private void UpdateWhetherHighlighted()
+        private LyricsTreeNodePresenter.Filter highlightedFilter;
+        private LyricsTreeNodePresenter.Filter HighlightedFilter
+        {
+            get
+            {
+                return highlightedFilter;
+            }
+        }
+        private void UpdateWhetherHighlighted(LyricsTreeNodePresenter.Filter filter)
         {
             try
             {
                 if (nodePresenter.IsFolder)
                 {
-                    Nullable<bool> descendentsAreHighlighted = HasDescendentsThatAreHighlighted();
-                    this.isHighted = (descendentsAreHighlighted.HasValue && descendentsAreHighlighted.Value);
+                    Nullable<bool> descendentsAreHighlighted = HasDescendentsThatAreHighlighted(filter);
+                    this.isHighlighted = (descendentsAreHighlighted.HasValue && descendentsAreHighlighted.Value);
                 }
                 else
                 {
-                    this.isHighted = GetLyricsIsFavourite(nodePresenter.nodePath);
+                    this.isHighlighted = filter(nodePresenter);
                 }
             }
             catch (System.Exception exception)
@@ -152,22 +162,22 @@ namespace LyricUser
             }
         }
 
-        private void LazyUpdateWhetherHighlighted()
+        private void LazyUpdateWhetherHighlighted(LyricsTreeNodePresenter.Filter filter)
         {
-            if (!this.isHighted.HasValue)
+            if (!this.isHighlighted.HasValue)
             {
-                UpdateWhetherHighlighted();
+                UpdateWhetherHighlighted(filter);
             }
         }
 
-        private void UpdateAppearance()
+        private void UpdateAppearance(LyricsTreeNodePresenter.Filter highlightedFilter)
         {
             this.Header = nodePresenter.nodeName;
             this.Tag = nodePresenter.nodePath;
 
-            LazyUpdateWhetherHighlighted();
+            LazyUpdateWhetherHighlighted(highlightedFilter);
 
-            if (isHighted.HasValue && isHighted.Value)
+            if (isHighlighted.HasValue && isHighlighted.Value)
             {
                 this.FontWeight = FontWeights.Bold;
             }
@@ -177,9 +187,10 @@ namespace LyricUser
             }
         }
 
-        public LyricsTreeViewItem(string nodePath)
+        public LyricsTreeViewItem(string nodePath, LyricsTreeNodePresenter.Filter highlightedFilter)
         {
             this.nodePresenter = new LyricsTreeNodePresenter(nodePath);
+            this.highlightedFilter = highlightedFilter;
 
             if (nodePresenter.IsFolder)
             {
@@ -198,7 +209,7 @@ namespace LyricUser
 
             RepopulateFolderNode();
 
-            UpdateAppearance();
+            UpdateAppearance(highlightedFilter);
         }
 
         private static void AddTreeItem(ItemsControl itemsControl, TreeViewItem newItem)
@@ -216,12 +227,12 @@ namespace LyricUser
             }
         }
 
-        public Nullable<bool> HasDescendentsThatAreHighlighted()
+        private Nullable<bool> HasDescendentsThatAreHighlighted(LyricsTreeNodePresenter.Filter filter)
         {
-            if (this.isHighted.HasValue)
+            if (this.isHighlighted.HasValue)
             {
                 // If current node has determined value, stop recursion
-                return this.isHighted;
+                return this.isHighlighted;
             }
             else
             {
@@ -243,7 +254,8 @@ namespace LyricUser
                         }
                         else
                         {
-                            Nullable<bool> childResult = childLyricsTreeViewItem.HasDescendentsThatAreHighlighted();
+                            Nullable<bool> childResult =
+                                childLyricsTreeViewItem.HasDescendentsThatAreHighlighted(filter);
                             if (!childResult.HasValue)
                             {
                                 // we don't know about something
@@ -273,17 +285,16 @@ namespace LyricUser
             {
                 foreach (string s in Directory.EnumerateFileSystemEntries(this.nodePresenter.nodePath))
                 {
-                    AddTreeItem(this, new LyricsTreeViewItem(s));
+                    AddTreeItem(this, new LyricsTreeViewItem(s, this.HighlightedFilter));
                 }
             }
         }
 
         public void LazyPopulateFolderNode()
         {
-            Nullable<bool> descendentsAreHighlighted = HasDescendentsThatAreHighlighted();
-            this.isHighted = (descendentsAreHighlighted.HasValue && descendentsAreHighlighted.Value);
+            this.isHighlighted = HasDescendentsThatAreHighlighted(HighlightedFilter);
 
-            UpdateAppearance();
+            UpdateAppearance(HighlightedFilter);
         }
 
         public LyricsTreeViewItem GetArtistNode()

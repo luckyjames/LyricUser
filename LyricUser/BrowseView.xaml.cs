@@ -244,7 +244,7 @@ namespace LyricUser
             }
             else
             {
-                tree.Items.Add(new LyricsTreeViewItem(rootPath));
+                tree.Items.Add(new LyricsTreeViewItem(rootPath, LyricsTreeNodePresenter.NodeIsFavourite));
 
                 if (this.favouritesCheckBox.IsChecked.HasValue && this.favouritesCheckBox.IsChecked.Value)
                 {
@@ -308,7 +308,7 @@ namespace LyricUser
             else
             {
                 Directory.CreateDirectory(artistFolderPath);
-                LyricsTreeViewItem newNode = new LyricsTreeViewItem(artistFolderPath);
+                LyricsTreeViewItem newNode = new LyricsTreeViewItem(artistFolderPath, LyricsTreeNodePresenter.NodeIsFavourite);
                 RootNode.Items.Add(newNode);
                 return newNode;
             }
