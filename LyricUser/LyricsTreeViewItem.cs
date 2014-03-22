@@ -15,6 +15,7 @@ namespace LyricUser
         Folder
     }
 
+    // This class represents the lyrics file in the tree data structure
     struct LyricsTreeNodePresenter
     {
         static bool FolderContainsLyrics(string folderPath)
@@ -48,17 +49,29 @@ namespace LyricUser
         public readonly string artistFolderName;
         public readonly string artistFolderPath;
         public readonly NodeType type;
-        public readonly bool isFile;
-        public readonly bool isFolder;
 
+        public bool IsFile
+        {
+            get
+            {
+                return type == NodeType.Song;
+            }
+        }
+
+        public bool IsFolder
+        {
+            get
+            {
+                return !IsFile;
+            }
+        }
+        
         public LyricsTreeNodePresenter(string path)
         {
             this.nodePath = path;
             this.nodeName = Path.GetFileName(path);
             this.type = DetermineNodeType(path);
-            this.isFile = (type == NodeType.Song);
-            this.isFolder = !isFile;
-            this.artistFolderPath = this.isFolder ? nodePath : Path.GetDirectoryName(nodePath);
+            this.artistFolderPath = (type != NodeType.Song) ? nodePath : Path.GetDirectoryName(nodePath);
             this.artistFolderName = Path.GetFileName(artistFolderPath);
         }
     }
@@ -74,7 +87,10 @@ namespace LyricUser
             else
             {
                 XmlLyricsFileParsingStrategy parser = new XmlLyricsFileParsingStrategy(lyricsFilePath);
-                return parser.GetLyricsIsFavourite();
+                
+                const bool defaultIsFavourite = false;
+
+                return parser.ReadToFirstValue(Schema.FavouriteElementName, defaultIsFavourite );
             }
         }
 
@@ -118,7 +134,7 @@ namespace LyricUser
         {
             try
             {
-                if (nodePresenter.isFolder)
+                if (nodePresenter.IsFolder)
                 {
                     Nullable<bool> descendantsAreFavourites = HasDescendentsThatAreFavourites();
                     this.isFavourite = (descendantsAreFavourites.HasValue && descendantsAreFavourites.Value);
@@ -165,12 +181,12 @@ namespace LyricUser
         {
             this.nodePresenter = new LyricsTreeNodePresenter(nodePath);
 
-            if (nodePresenter.isFolder)
+            if (nodePresenter.IsFolder)
             {
                 // add a dummy sub-item so it can be expanded
                 this.Expanded += new RoutedEventHandler(folderTreeViewItem_Expanded);
             }
-            else if (nodePresenter.isFile)
+            else if (nodePresenter.IsFile)
             {
                 this.MouseDoubleClick += new MouseButtonEventHandler(fileTreeViewItem_MouseDoubleClick);
             }
@@ -253,7 +269,7 @@ namespace LyricUser
             // only one child with no text - this is the first expansion
             this.Items.Clear();
 
-            if (nodePresenter.isFolder)
+            if (nodePresenter.IsFolder)
             {
                 foreach (string s in Directory.EnumerateFileSystemEntries(this.nodePresenter.nodePath))
                 {

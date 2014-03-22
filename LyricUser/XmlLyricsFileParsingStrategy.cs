@@ -213,11 +213,6 @@ namespace LyricUser
                 return (XmlNodeType.Element == xmlTextReader.NodeType);
             }
 
-            public static ValueType ConvertStringToValue<ValueType>(string stringValue)
-            {
-                return (ValueType)Convert.ChangeType(stringValue, typeof(ValueType));
-            }
-
             /// <summary>
             /// Parse data on construction
             /// </summary>
@@ -269,10 +264,10 @@ namespace LyricUser
         /// <typeparam name="ValueType"></typeparam>
         /// <param name="key"></param>
         /// <returns></returns>
-        public ValueType ReadValue<ValueType>(string key)
+        public ValueType ReadToFirstValue<ValueType>(string key)
         {
             ValueType result;
-            if (!TryReadValue<ValueType>(key, out result))
+            if (!TryReadToFirstValue<ValueType>(key, out result))
             {
                 throw new ApplicationException("key " + key + " could not be found");
             }
@@ -288,7 +283,26 @@ namespace LyricUser
         /// <typeparam name="ValueType"></typeparam>
         /// <param name="key"></param>
         /// <returns></returns>
-        private bool TryReadValue<ValueType>(string key, out ValueType value)
+        public ValueType ReadToFirstValue<ValueType>(string key, ValueType defaultValue)
+        {
+            ValueType result;
+            if (!TryReadToFirstValue<ValueType>(key, out result))
+            {
+                return defaultValue;
+            }
+            else
+            {
+                return result;
+            }
+        }
+
+        /// <summary>
+        /// Finds the value corresponding to the specified key and converts it to the supplied generic type
+        /// </summary>
+        /// <typeparam name="ValueType"></typeparam>
+        /// <param name="key"></param>
+        /// <returns></returns>
+        public bool TryReadToFirstValue<ValueType>(string key, out ValueType value)
         {
             if (null == key)
             {
@@ -299,8 +313,9 @@ namespace LyricUser
                 string stringValueFound;
                 if (object.ReferenceEquals(null, allDataPairs) || !allDataPairs.TryGetValue(key, out stringValueFound))
                 {
-                    // Read only until the desired key is found
+                    // Passing key to ReadAll will halt when the desired key is found
                     allDataPairs = Implementation.ReadAll(xmlFileUrl, key);
+
                     if (!allDataPairs.TryGetValue(key, out stringValueFound))
                     {
                         value = default(ValueType);
@@ -311,7 +326,7 @@ namespace LyricUser
 
                 try
                 {
-                    value = Implementation.ConvertStringToValue<ValueType>(stringValueFound);
+                    value = XmlValueConverter.ConvertStringToValue<ValueType>(stringValueFound);
 
                     return true;
                 }
@@ -322,19 +337,6 @@ namespace LyricUser
 
                     throw formatException;
                 }
-            }
-        }
-
-        public bool GetLyricsIsFavourite()
-        {
-            bool result;
-            if (this.TryReadValue<bool>(Schema.FavouriteElementName, out result))
-            {
-                return result;
-            }
-            else
-            {
-                return false;
             }
         }
 

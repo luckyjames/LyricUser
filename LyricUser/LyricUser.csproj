@@ -90,6 +90,7 @@
     <Compile Include="LyricsPresenter.cs" />
     <Compile Include="LyricsTreeViewItem.cs" />
     <Compile Include="XmlLyricsFileParsingStrategy.cs" />
+    <Compile Include="XmlValueConverter.cs" />
     <Page Include="AutoScalingTextBox.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>

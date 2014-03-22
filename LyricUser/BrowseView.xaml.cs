@@ -380,7 +380,7 @@ namespace LyricUser
             }
             else
             {
-                if (currentItem.NodePresenter.isFolder)
+                if (currentItem.NodePresenter.IsFolder)
                 {
                     // Remove current folder node
                     // Update file system
