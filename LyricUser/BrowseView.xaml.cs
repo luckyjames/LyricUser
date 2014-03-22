@@ -244,7 +244,7 @@ namespace LyricUser
             }
             else
             {
-                tree.Items.Add(new LyricsTreeViewItem(rootPath, LyricsTreeNodePresenter.NodeIsFavourite));
+                tree.Items.Add(new LyricsTreeViewItem(rootPath, GetCurrentHighlightFilter()));
 
                 if (this.favouritesCheckBox.IsChecked.HasValue && this.favouritesCheckBox.IsChecked.Value)
                 {
@@ -298,6 +298,11 @@ namespace LyricUser
             return Microsoft.VisualBasic.Interaction.InputBox(promptText, title, "Default", 0, 0);
         }
 
+        private LyricsTreeNodePresenter.Filter GetCurrentHighlightFilter()
+        {
+            return LyricsTreeNodePresenter.NodeIsSingable;
+        }
+
         private LyricsTreeViewItem AddArtist(string artistName)
         {
             string artistFolderPath = Path.Combine(this.RootPath, artistName);
@@ -308,7 +313,7 @@ namespace LyricUser
             else
             {
                 Directory.CreateDirectory(artistFolderPath);
-                LyricsTreeViewItem newNode = new LyricsTreeViewItem(artistFolderPath, LyricsTreeNodePresenter.NodeIsFavourite);
+                LyricsTreeViewItem newNode = new LyricsTreeViewItem(artistFolderPath, GetCurrentHighlightFilter());
                 RootNode.Items.Add(newNode);
                 return newNode;
             }

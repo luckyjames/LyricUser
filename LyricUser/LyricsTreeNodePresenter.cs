@@ -36,6 +36,22 @@ namespace LyricUser
             }
         }
 
+        public static bool NodeIsSingable(LyricsTreeNodePresenter presenter)
+        {
+            if (".xml" != Path.GetExtension(presenter.nodePath))
+            {
+                return false;
+            }
+            else
+            {
+                XmlLyricsFileParsingStrategy parser = new XmlLyricsFileParsingStrategy(presenter.nodePath);
+                
+                const bool defaultIsSingable = false;
+
+                return parser.ReadToFirstValue(Schema.SingableElementName, defaultIsSingable);
+            }
+        }
+
         static bool FolderContainsLyrics(string folderPath)
         {
             foreach (var file in Directory.EnumerateFiles(folderPath))
