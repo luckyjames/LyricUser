@@ -1,6 +1,14 @@
 <?xml version="1.0"?>
 <Wix xmlns="http://schemas.microsoft.com/wix/2006/wi">
-    <Product Id="*" Name="LyricsUser" Language="1033" Version="1.0.0.0" UpgradeCode="242093B1-450D-4AC5-9D73-3C91C00B0FB5" Manufacturer="James">
+    <!-- Consider Version="!(bind.FileVersion.LyricUser)" -->
+    <!-- Consider Version="1.0.0.0" -->
+    <Product
+        Id="*"
+        Name="LyricsUser"
+        Language="1033"
+        Version="1.0.0.0"
+        UpgradeCode="242093B1-450D-4AC5-9D73-3C91C00B0FB5"
+        Manufacturer="James">
         <Package
             Description="#Description"
             Comments="Installer for LyricsUser"
@@ -57,4 +65,3 @@
         <UIRef Id="WixUI_InstallDir" />
     </Product>
 </Wix>
-
