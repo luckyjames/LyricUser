@@ -335,7 +335,7 @@ namespace LyricUser
                     System.Diagnostics.Debug.WriteLine(
                         "Bad value '" + stringValueFound + "' for " + key + " in " + xmlFileUrl + ":\n\n" + formatException);
 
-                    throw formatException;
+                    throw;
                 }
             }
         }

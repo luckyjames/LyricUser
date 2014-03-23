@@ -5,7 +5,17 @@ namespace LyricUser
     {
         public static ValueType ConvertStringToValue<ValueType>(string stringValue)
         {
-            return (ValueType)System.Convert.ChangeType(stringValue, typeof(ValueType));
+            try
+            {
+                return (ValueType)System.Convert.ChangeType(stringValue, typeof(ValueType));
+            }
+            catch (System.FormatException)
+            {
+                System.Diagnostics.Debug.WriteLine(
+                    "Can't convert '" + stringValue + "' to " + typeof(ValueType).ToString());
+
+                throw;
+            }
         }
     }
 }

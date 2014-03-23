@@ -20,36 +20,37 @@ namespace LyricUser
     {
         public delegate bool Filter(LyricsTreeNodePresenter presenter);
 
-        public static bool NodeIsFavourite(LyricsTreeNodePresenter presenter)
+        private static bool GetBoolean(LyricsTreeNodePresenter presenter, string elementName)
         {
-            if (".xml" != Path.GetExtension(presenter.nodePath))
+            try
+            {
+                if (".xml" != Path.GetExtension(presenter.nodePath))
+                {
+                    return false;
+                }
+                else
+                {
+                    XmlLyricsFileParsingStrategy parser = new XmlLyricsFileParsingStrategy(presenter.nodePath);
+                    
+                    const bool defaultIsFavourite = false;
+    
+                    return parser.ReadToFirstValue(elementName, defaultIsFavourite);
+                }
+            }
+            catch (System.FormatException)
             {
                 return false;
             }
-            else
-            {
-                XmlLyricsFileParsingStrategy parser = new XmlLyricsFileParsingStrategy(presenter.nodePath);
-                
-                const bool defaultIsFavourite = false;
+        }
 
-                return parser.ReadToFirstValue(Schema.FavouriteElementName, defaultIsFavourite );
-            }
+        public static bool NodeIsFavourite(LyricsTreeNodePresenter presenter)
+        {
+            return GetBoolean(presenter, Schema.FavouriteElementName);
         }
 
         public static bool NodeIsSingable(LyricsTreeNodePresenter presenter)
         {
-            if (".xml" != Path.GetExtension(presenter.nodePath))
-            {
-                return false;
-            }
-            else
-            {
-                XmlLyricsFileParsingStrategy parser = new XmlLyricsFileParsingStrategy(presenter.nodePath);
-                
-                const bool defaultIsSingable = false;
-
-                return parser.ReadToFirstValue(Schema.SingableElementName, defaultIsSingable);
-            }
+            return GetBoolean(presenter, Schema.SingableElementName);
         }
 
         static bool FolderContainsLyrics(string folderPath)
